@@ -1,0 +1,13 @@
+url = "/landing"
+layout = "default"
+title = "Landing Page Demo"
+meta_title = "{{ landingPage.title }}"
+
+[section landingPage]
+
+[resources]
+vars[activeNavLink] = 'tailor'
+==
+{% for block in landingPage.blocks %}
+    {% partial 'blockbuilder/' ~ block.type block=block %}
+{% endfor %}
