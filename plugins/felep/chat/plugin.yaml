@@ -1,0 +1,6 @@
+plugin:
+    name: 'felep.chat::lang.plugin.name'
+    description: 'felep.chat::lang.plugin.description'
+    author: felipe
+    icon: oc-icon-adjust
+    homepage: ''
