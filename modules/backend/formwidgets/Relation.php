@@ -20,6 +20,11 @@ class Relation extends FormWidgetBase
     //
 
     /**
+     * @var bool useController to completely replace this widget the `RelationController` behavior.
+     */
+    public $useController;
+
+    /**
      * @var string nameFrom is the model column to use for the name reference
      */
     public $nameFrom = 'name';
@@ -73,6 +78,9 @@ class Relation extends FormWidgetBase
         if (isset($this->config->select)) {
             $this->sqlSelect = $this->config->select;
         }
+
+        // @deprecated the default value should be true
+        $this->useController = $this->evalUseController($this->config->useController ?? false);
     }
 
     /**
@@ -81,6 +89,7 @@ class Relation extends FormWidgetBase
     public function render()
     {
         $this->prepareVars();
+
         return $this->makePartial('relation');
     }
 
@@ -89,7 +98,32 @@ class Relation extends FormWidgetBase
      */
     public function prepareVars()
     {
+        if ($this->useController) {
+            return;
+        }
+
         $this->vars['field'] = $this->makeRenderFormField();
+    }
+
+    /**
+     * evalUseController determines if the relation controller is usable and returns the default
+     * preference if it can be used.
+     */
+    protected function evalUseController(bool $defaultPref): bool
+    {
+        if (!$this->controller->isClassExtendedWith(\Backend\Behaviors\RelationController::class)) {
+            return false;
+        }
+
+        if (!is_string($this->valueFrom)) {
+            return false;
+        }
+
+        if (!$this->controller->relationHasField($this->valueFrom)) {
+            return false;
+        }
+
+        return $defaultPref;
     }
 
     /**

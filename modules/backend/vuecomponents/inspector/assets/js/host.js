@@ -1,6 +1,5 @@
-+(function($) {
-    'use strict';
-    var InspectorHost = function() {
+$.oc.module.register('backend.component.inspector.inspectorhost', function () {
+    var InspectorHost = function () {
         this.showModal = function showModal(title, obj, dataSchema, uniqueId, options) {
             if (typeof title !== 'string' || !title.length) {
                 throw new Error('Inspector title is a required string');
@@ -48,27 +47,27 @@
 
             var modalClass = Vue.extend(Vue.options.components['backend-component-inspector-host-modal']);
 
-            return new Promise(function(resolve, reject) {
+            return new Promise(function (resolve, reject) {
                 var inspectorInstance = new modalClass({
-                        propsData: {
-                            title: title,
-                            description: options.description || '',
-                            dataSchema: dataSchema,
-                            data: {
-                                obj: obj
-                            },
-                            buttonText: options.buttonText,
-                            size: options.size || 'normal',
-                            uniqueId: uniqueId,
-                            resizableWidth: options.resizableWidth
-                        }
-                    }),
+                    propsData: {
+                        title: title,
+                        description: options.description || '',
+                        dataSchema: dataSchema,
+                        data: {
+                            obj: obj
+                        },
+                        buttonText: options.buttonText,
+                        size: options.size || 'normal',
+                        uniqueId: uniqueId,
+                        resizableWidth: options.resizableWidth
+                    }
+                }),
                     applyClicked = false;
 
                 inspectorInstance.$mount();
                 document.body.appendChild(inspectorInstance.$el);
 
-                inspectorInstance.$once('hook:beforeDestroy', function() {
+                inspectorInstance.$once('hook:beforeDestroy', function () {
                     document.body.removeChild(inspectorInstance.$el);
 
                     if (!applyClicked) {
@@ -76,13 +75,13 @@
                     }
                 });
 
-                inspectorInstance.$on('beforeapply', function(callbackHolder) {
+                inspectorInstance.$on('beforeapply', function (callbackHolder) {
                     if (options.beforeApplyCallback) {
                         callbackHolder.callback = options.beforeApplyCallback;
                     }
                 });
 
-                inspectorInstance.$once('applyclick', function() {
+                inspectorInstance.$once('applyclick', function () {
                     applyClicked = true;
                     resolve();
                 });
@@ -99,4 +98,4 @@
     }
 
     $.oc.vueComponentHelpers.inspector.host = new InspectorHost();
-})(window.jQuery);
+});

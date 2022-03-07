@@ -22,9 +22,19 @@ class MediaLibraryItem
     const FILE_TYPE_DOCUMENT = 'document';
 
     /**
+     * @var string title specifies the item title.
+     */
+    public $title;
+
+    /**
      * @var string path specifies the item path relative to the Library root.
      */
     public $path;
+
+    /**
+     * @var string spawnPath used to create this instance.
+     */
+    public $spawnPath;
 
     /**
      * @var integer size specifies the item size.
@@ -81,6 +91,7 @@ class MediaLibraryItem
         $this->lastModified = $lastModified;
         $this->type = $type;
         $this->publicUrl = $publicUrl;
+        $this->title = basename($path);
     }
 
     /**

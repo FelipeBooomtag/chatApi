@@ -291,7 +291,9 @@ class ListController extends ControllerBehavior
             $widgetConfig->showTree = $config->showTree;
             $widgetConfig->treeExpanded = $config->treeExpanded ?? false;
             $widgetConfig->showReorder = false;
-            return $widgetConfig;
+            if (!isset($config->structure)) {
+                return $widgetConfig;
+            }
         }
 
         // New API

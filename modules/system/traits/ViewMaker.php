@@ -82,7 +82,7 @@ trait ViewMaker
         $notRealPath = realpath($partial) === false || is_dir($partial) === true;
         if (!File::isPathSymbol($partial) && $notRealPath) {
             $folder = strpos($partial, '/') !== false ? dirname($partial) . '/' : '';
-            $partial = $folder . '_' . strtolower(basename($partial)).'.htm';
+            $partial = $folder . '_' . strtolower(basename($partial));
         }
 
         $partialPath = $this->getViewPath($partial);
@@ -101,13 +101,13 @@ trait ViewMaker
     /**
      * makeView loads a view with the name specified. Applies layout if its name is provided
      * by the parent object. The view file must be situated in the views directory, and has
-     * the extension "htm"
+     * the extension "htm" or "php"
      * @param string $view Specifies the view name, without extension. Eg: "index".
      * @return string
      */
     public function makeView($view)
     {
-        $viewPath = $this->getViewPath(strtolower($view) . '.htm');
+        $viewPath = $this->getViewPath(strtolower($view));
 
         $contents = $this->makeFileContents($viewPath);
 
@@ -148,7 +148,7 @@ trait ViewMaker
             return '';
         }
 
-        $layoutPath = $this->getViewPath($layout . '.htm', $this->layoutPath);
+        $layoutPath = $this->getViewPath($layout, $this->layoutPath);
 
         if (!File::exists($layoutPath)) {
             if ($throwException) {
@@ -197,23 +197,33 @@ trait ViewMaker
 
         $fileName = File::symbolizePath($fileName);
 
-        if (File::isLocalPath($fileName) ||
-            (!Config::get('system.restrict_base_dir', true) && realpath($fileName) !== false)
-        ) {
-            return $fileName;
-        }
-
+        // Check in view paths
         if (!is_array($viewPath)) {
             $viewPath = [$viewPath];
         }
 
-        foreach ($viewPath as $path) {
-            $_fileName = File::symbolizePath($path) . '/' . $fileName;
-            if (File::isFile($_fileName)) {
-                return $_fileName;
+        foreach (['php', 'htm'] as $extension) {
+            foreach ($viewPath as $path) {
+                $_fileName = File::symbolizePath($path) . '/' . $fileName . '.' . $extension;
+                if (File::isFile($_fileName)) {
+                    return $_fileName;
+                }
             }
         }
 
+        // Check in absolute
+        // @deprecated rem system.restrict_base_dir, replace with line below
+        // if (strpos($fileName, '/') !== false && File::isLocalPath($fileName))
+        if (
+            strpos($fileName, '/') !== false && (
+                File::isLocalPath($fileName) ||
+                (!Config::get('system.restrict_base_dir', true) && realpath($fileName) !== false)
+            )
+        ) {
+            return $fileName;
+        }
+
+        // Returns the closest guess, although invalid
         return $fileName;
     }
 
@@ -227,6 +237,7 @@ trait ViewMaker
     {
         if (!strlen($filePath) ||
             !File::isFile($filePath) ||
+            // @deprecated only resources can be symlinked (system.restrict_base_dir)
             (!File::isLocalPath($filePath) && Config::get('system.restrict_base_dir', true))
         ) {
             return '';

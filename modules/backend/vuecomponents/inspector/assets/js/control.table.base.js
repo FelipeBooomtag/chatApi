@@ -1,5 +1,4 @@
-+(function($) {
-    'use strict';
+$.oc.module.register('backend.component.inspector.tablecontrolbase', function () {
     var TableControlBase = {
         props: {
             row: Object,
@@ -43,4 +42,4 @@
     }
 
     $.oc.vueComponentHelpers.inspector.table.controlBase = TableControlBase;
-})(window.jQuery);
+});

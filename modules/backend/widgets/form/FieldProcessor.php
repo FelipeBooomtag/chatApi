@@ -111,20 +111,21 @@ trait FieldProcessor
                 continue;
             }
 
-            /*
-             * Determine field method
-             */
-            if (!is_string($field->options) && $field->options !== null) {
+            // Specified explicitly on the object already
+            if ($field->hasOptions() && is_array($field->options)) {
                 continue;
             }
 
-            $fieldMethod = $field->options ?: ($field->config['options'] ?? null);
+            // Look at config value in case it was missed
+            $fieldOptions = $field->options ?: ($field->config['options'] ?? null);
 
-            /*
-             * Defer the execution of option data collection
-             */
-            $field->options(function () use ($field, $fieldMethod) {
-                return $field->getOptionsFromModel($this->model, $fieldMethod, $this->data);
+            // Defer the execution of option data collection
+            $field->options(function () use ($field, $fieldOptions) {
+                if (!is_array($fieldOptions)) {
+                    return $field->getOptionsFromModel($this->model, $fieldOptions, $this->data);
+                }
+
+                return $fieldOptions;
             });
         }
     }

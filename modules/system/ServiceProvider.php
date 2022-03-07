@@ -6,6 +6,7 @@ use View;
 use Event;
 use Config;
 use Schema;
+use System;
 use Backend;
 use BackendMenu;
 use BackendAuth;
@@ -181,10 +182,13 @@ class ServiceProvider extends ModuleServiceProvider
 
             $manager->registerFilters([
                 // Escaped Classes
+                'str_*' => [\Str::class, '*', true],
+                'html_*' => [\Html::class, '*', true],
                 'trans' => [\Lang::class, 'get', true],
                 'transchoice' => [\Lang::class, 'choice', true],
 
                 // Raw Classes
+                'url_*' => [\Url::class, '*'],
                 'slug' => [\Str::class, 'slug'],
                 'plural' => [\Str::class, 'plural'],
                 'singular' => [\Str::class, 'singular'],
@@ -282,13 +286,24 @@ class ServiceProvider extends ModuleServiceProvider
             $twig = new TwigEnvironment(new TwigLoader, ['auto_reload' => true]);
             $twig->addExtension(new TwigExtension);
 
-            // @deprecated v2 should be default
+            // @deprecated use code below in v3
             if (env('CMS_SECURITY_POLICY_V2', false)) {
-                $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicyV2, true));
-            }
-            else {
                 $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicy, true));
             }
+            else {
+                $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicyLegacy, true));
+            }
+
+            // @deprecated always use the main policy here
+            // if (env('CMS_SECURITY_POLICY_V1', false)) {
+            //     $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicyLegacy, true));
+            // }
+            // else {
+            //     $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicy, true));
+            // }
+
+            // Desired logic
+            // $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicy, true));
 
             return $twig;
         });
@@ -300,13 +315,24 @@ class ServiceProvider extends ModuleServiceProvider
             $twig = new TwigEnvironment(new TwigLoader, ['auto_reload' => true]);
             $twig->addExtension(new TwigExtension);
 
-            // @deprecated v2 should be default
+            // @deprecated use code below in v3
             if (env('CMS_SECURITY_POLICY_V2', false)) {
-                $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicyV2, true));
-            }
-            else {
                 $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicy, true));
             }
+            else {
+                $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicyLegacy, true));
+            }
+
+            // @deprecated always use the main policy here
+            // if (env('CMS_SECURITY_POLICY_V1', false)) {
+            //     $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicyLegacy, true));
+            // }
+            // else {
+            //     $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicy, true));
+            // }
+
+            // Desired logic
+            // $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicy, true));
 
             $twig->addTokenParser(new \System\Twig\MailPartialTokenParser);
             return $twig;

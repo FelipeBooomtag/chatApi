@@ -170,7 +170,7 @@ class ListStructure extends Lists
      */
     protected function getIndentSize(): int
     {
-        return 24;
+        return 18;
     }
 
     /**
@@ -178,8 +178,9 @@ class ListStructure extends Lists
      */
     protected function getIndentStartSize(int $treeLevel): int
     {
-        $indentLevel = $treeLevel + ($this->showReorder && $this->showTree ? 2 : 1);
-        return ($indentLevel * $this->getIndentSize()) + ($this->showReorder ? 20 : 15);
+        return ($treeLevel * $this->getIndentSize()) +
+            ($this->showTree ? 15 : 0) +
+            ($this->showReorder ? 0 : 15);
     }
 
     /**

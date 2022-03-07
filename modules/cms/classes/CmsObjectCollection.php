@@ -36,7 +36,7 @@ class CmsObjectCollection extends CollectionBase
     }
 
     /**
-     * Returns objects whose properties match the supplied value.
+     * where objects whose properties match the supplied value.
      * @param string $property
      * @param string $value
      * @param bool $strict
@@ -57,7 +57,7 @@ class CmsObjectCollection extends CollectionBase
     }
 
     /**
-     * Returns objects whose component properties match the supplied value.
+     * whereComponent objects whose component properties match the supplied value.
      * @param mixed $components
      * @param string $property
      * @param string $value

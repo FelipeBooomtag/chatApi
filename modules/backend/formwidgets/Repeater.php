@@ -16,7 +16,7 @@ class Repeater extends FormWidgetBase
     use \Backend\FormWidgets\Repeater\HasJsonStore;
     use \Backend\FormWidgets\Repeater\HasRelationStore;
 
-    const MODE_SIMPLE = 'simple';
+    const MODE_ACCORDION = 'accordion';
     const MODE_BUILDER = 'builder';
 
     //
@@ -73,6 +73,22 @@ class Repeater extends FormWidgetBase
      * @deprecated
      */
     public $style;
+
+    /**
+     * @var string Defines a mount point for the editor toolbar.
+     * Must include a module name that exports the Vue application and a state element name.
+     * Format: module.name::stateElementName
+     * Only works in Vue applications and form document layouts.
+     */
+    public $externalToolbarAppState = null;
+
+    /**
+     * @var string Defines an event bus for an external toolbar.
+     * Must include a module name that exports the Vue application and a state element name.
+     * Format: module.name::eventBus
+     * Only works in Vue applications and form document layouts.
+     */
+    public $externalToolbarEventBus = null;
 
     //
     // Object properties
@@ -140,6 +156,8 @@ class Repeater extends FormWidgetBase
             'groupKeyFrom',
             'minItems',
             'maxItems',
+            'externalToolbarAppState',
+            'externalToolbarEventBus'
         ]);
 
         if ($this->formField->disabled) {
@@ -200,6 +218,8 @@ class Repeater extends FormWidgetBase
         $this->vars['groupDefinitions'] = $this->groupDefinitions;
         $this->vars['showReorder'] = $this->showReorder;
         $this->vars['showDuplicate'] = $this->showDuplicate;
+        $this->vars['externalToolbarAppState'] = $this->externalToolbarAppState;
+        $this->vars['externalToolbarEventBus'] = $this->externalToolbarEventBus;
     }
 
     /**
@@ -208,7 +228,7 @@ class Repeater extends FormWidgetBase
     protected function loadAssets()
     {
         $this->addCss('css/repeater.css', 'core');
-        $this->addJs('js/repeater.standard.js', 'core');
+        $this->addJs('js/repeater.accordion.js', 'core');
         $this->addJs('js/repeater.builder.js', 'core');
         $this->addJs('js/repeater.js', 'core');
     }
@@ -232,8 +252,16 @@ class Repeater extends FormWidgetBase
             return;
         }
 
-        $this->formField->value = post($this->formField->getName());
+        $this->formField->value = $this->getLoadedValueFromPost();
         $this->isLoaded = true;
+    }
+
+    /**
+     * getLoadedValueFromPost returns the loaded value from postback with indexes intact
+     */
+    protected function getLoadedValueFromPost()
+    {
+        return post($this->formField->getName());
     }
 
     /**
@@ -368,7 +396,7 @@ class Repeater extends FormWidgetBase
     protected function getValueFromIndex(int $index)
     {
         $data = $this->isLoaded
-            ? post($this->formField->getName())
+            ? $this->getLoadedValueFromPost()
             : $this->getLoadValue();
 
         return $data[$index] ?? [];
@@ -379,7 +407,7 @@ class Repeater extends FormWidgetBase
      */
     protected function getDisplayMode(): string
     {
-        return $this->displayMode ?: static::MODE_SIMPLE;
+        return $this->displayMode ?: static::MODE_ACCORDION;
     }
 
     //
@@ -471,7 +499,7 @@ class Repeater extends FormWidgetBase
     protected function getNextIndex(): int
     {
         $data = $this->isLoaded
-            ? post($this->formField->getName())
+            ? $this->getLoadedValueFromPost()
             : $this->getLoadValue();
 
         if (is_array($data) && count($data)) {
@@ -522,10 +550,10 @@ class Repeater extends FormWidgetBase
             foreach ($group as $code => $config) {
                 $palette[$code] = [
                     'code' => $code,
-                    'name' => array_get($config, 'name'),
-                    'icon' => array_get($config, 'icon', 'icon-square-o'),
-                    'description' => array_get($config, 'description'),
-                    'fields' => array_get($config, 'fields')
+                    'name' => $config['name'] ?? '',
+                    'icon' => $config['icon'] ?? 'icon-square-o',
+                    'description' => $config['description'] ?? '',
+                    'fields' => $config['fields'] ?? ''
                 ];
             }
 
@@ -536,11 +564,10 @@ class Repeater extends FormWidgetBase
     /**
      * getGroupCodeFromIndex returns a field group code from its index
      * @param $index int
-     * @return string
      */
-    public function getGroupCodeFromIndex($index)
+    public function getGroupCodeFromIndex($index): string
     {
-        return array_get($this->indexMeta, $index.'.groupCode');
+        return (string) array_get($this->indexMeta, $index.'.groupCode');
     }
 
     /**

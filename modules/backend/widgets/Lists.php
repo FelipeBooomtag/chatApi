@@ -335,7 +335,7 @@ class Lists extends WidgetBase implements ListElement
     }
 
     /**
-     * Replaces the @ symbol with a table name in a model
+     * parseTableName replaces the @ symbol with a table name in a model
      * @param  string $sql
      * @param  string $table
      * @return string
@@ -346,7 +346,7 @@ class Lists extends WidgetBase implements ListElement
     }
 
     /**
-     * Applies any filters to the model.
+     * prepareQuery applies any filters to the model
      */
     public function prepareQuery()
     {
@@ -376,17 +376,13 @@ class Lists extends WidgetBase implements ListElement
          */
         $this->fireSystemEvent('backend.list.extendQueryBefore', [$query]);
 
-        /*
-         * Prepare searchable column names
-         */
+        // Prepare searchable column names
         $primarySearchable = [];
         $relationSearchable = [];
 
         if (!empty($this->searchTerm) && ($searchableColumns = $this->getSearchableColumns())) {
             foreach ($searchableColumns as $column) {
-                /*
-                 * Related
-                 */
+                // Related
                 if ($this->isColumnRelated($column)) {
                     $table = $this->model->makeRelation($column->relation)->getTable();
                     $columnName = isset($column->sqlSelect)
@@ -395,9 +391,7 @@ class Lists extends WidgetBase implements ListElement
 
                     $relationSearchable[$column->relation][] = $columnName;
                 }
-                /*
-                 * Primary
-                 */
+                // Primary
                 else {
                     $columnName = isset($column->sqlSelect)
                         ? DbDongle::raw($this->parseTableName($column->sqlSelect, $primaryTable))
@@ -408,9 +402,7 @@ class Lists extends WidgetBase implements ListElement
             }
         }
 
-        /*
-         * Prepare related eager loads (withs) and custom selects (joins)
-         */
+        // Prepare related eager loads (withs) and custom selects (joins)
         foreach ($this->getVisibleColumns() as $column) {
             if ($column->useRelationCount()) {
                 $query->withCount($column->relation);
@@ -427,34 +419,24 @@ class Lists extends WidgetBase implements ListElement
             $joins[] = $column->relation;
         }
 
-        /*
-         * Add eager loads to the query
-         */
+        // Add eager loads to the query
         if ($withs) {
             $query->with(array_unique($withs));
         }
 
-        /*
-         * Apply search term
-         */
+        // Apply search term
         $query->where(function ($innerQuery) use ($primarySearchable, $relationSearchable, $joins) {
 
-            /*
-             * Search primary columns
-             */
+            // Search primary columns
             if (count($primarySearchable) > 0) {
                 $this->applySearchToQuery($innerQuery, $primarySearchable, 'or');
             }
 
-            /*
-             * Search relation columns
-             */
+            // Search relation columns
             if ($joins) {
                 foreach (array_unique($joins) as $join) {
-                    /*
-                     * Apply a supplied search term for relation columns and
-                     * constrain the query only if there is something to search for
-                     */
+                    // Apply a supplied search term for relation columns and constrain
+                    // the query only if there is something to search for
                     $columnsToSearch = array_get($relationSearchable, $join, []);
 
                     if (count($columnsToSearch) > 0) {
@@ -466,9 +448,7 @@ class Lists extends WidgetBase implements ListElement
             }
         });
 
-        /*
-         * Custom select queries
-         */
+        // Custom select queries
         foreach ($this->getVisibleColumns() as $column) {
             if (!isset($column->sqlSelect)) {
                 continue;
@@ -476,9 +456,7 @@ class Lists extends WidgetBase implements ListElement
 
             $alias = $query->getQuery()->getGrammar()->wrap($column->columnName);
 
-            /*
-             * Relation column
-             */
+            // Relation column
             if (isset($column->relation)) {
                 // @todo Find a way...
                 $relationType = $this->model->getRelationType($column->relation);
@@ -489,9 +467,7 @@ class Lists extends WidgetBase implements ListElement
                 $table = $this->model->makeRelation($column->relation)->getTable();
                 $sqlSelect = $this->parseTableName($column->sqlSelect, $table);
 
-                /*
-                 * Manipulate a count query for the sub query
-                 */
+                // Manipulate a count query for the sub query
                 $relationObj = $this->model->{$column->relation}();
                 $countQuery = $relationObj->getRelationExistenceQuery($relationObj->getRelated()->newQueryWithoutScopes(), $query);
 
@@ -503,24 +479,22 @@ class Lists extends WidgetBase implements ListElement
 
                 $selects[] = Db::raw("(".$joinSql.") as ".$alias);
 
-                /*
-                 * If this is a polymorphic relation there will be bindings that need to be added to the query
-                 */
+                // If this is a polymorphic relation there will be bindings that need to be added to the query
                 $bindings = array_merge($bindings, $countQuery->getBindings());
             }
-            /*
-             * Primary column
-             */
+            // Primary column
             else {
                 $sqlSelect = $this->parseTableName($column->sqlSelect, $primaryTable);
                 $selects[] = DbDongle::raw($sqlSelect . ' as '. $alias);
             }
         }
 
-        /*
-         * Apply sorting
-         */
-        if ($this->useSorting() && ($sortColumn = $this->getSortColumn())) {
+        // Apply sorting
+        if (
+            $this->useSorting() &&
+            ($sortColumn = $this->getSortColumn()) &&
+            $this->isColumnVisible($sortColumn)
+        ) {
             if (($column = array_get($this->allColumns, $sortColumn)) && $column->valueFrom) {
                 $sortColumn = $this->isColumnPivot($column)
                     ? 'pivot_' . $column->valueFrom
@@ -534,21 +508,15 @@ class Lists extends WidgetBase implements ListElement
             $query->orderBy($sortColumn, $this->sortDirection);
         }
 
-        /*
-         * Apply filters
-         */
+        // Apply filters
         foreach ($this->filterCallbacks as $callback) {
             $callback($query);
         }
 
-        /*
-         * Add custom selects
-         */
+        // Add custom selects
         $query->addSelect($selects);
 
-        /*
-         * Add bindings for polymorphic relations
-         */
+        // Add bindings for polymorphic relations
         $query->addBinding($bindings, 'select');
 
         /**
@@ -577,7 +545,7 @@ class Lists extends WidgetBase implements ListElement
     }
 
     /**
-     * Returns all the records from the supplied model, after filtering.
+     * getRecords returns all the records from the supplied model, after filtering.
      * @return Collection
      */
     protected function getRecords()
@@ -1380,17 +1348,25 @@ class Lists extends WidgetBase implements ListElement
         $colName = $column->columnName;
         $image = null;
 
+        // File model
         if (isset($record->attachMany[$colName])) {
             $image = $value ? $value->first() : null;
         }
         elseif (isset($record->attachOne[$colName])) {
             $image = $value;
         }
-        elseif (strpos($value, '://') !== false) {
-            $image = $value;
-        }
-        elseif (strlen($value)) {
-            $image = \Media\Classes\MediaLibrary::url($value);
+        // Media item
+        else {
+            if (is_array($value)) {
+                $value = array_unshift($value);
+            }
+
+            if (strpos($value, '://') !== false) {
+                $image = $value;
+            }
+            elseif (strlen($value)) {
+                $image = \Media\Classes\MediaLibrary::url($value);
+            }
         }
 
         if (!$image) {
@@ -1792,7 +1768,7 @@ class Lists extends WidgetBase implements ListElement
     }
 
     /**
-     * Returns the current sorting column, saved in a session or cached.
+     * getSortColumn returns the current sorting column, saved in a session or cached.
      */
     public function getSortColumn()
     {
@@ -1804,17 +1780,12 @@ class Lists extends WidgetBase implements ListElement
             return $this->sortColumn;
         }
 
-        /*
-         * User preference
-         */
+        // User preference
         if ($this->showSorting && ($sortOptions = $this->getSession('sort'))) {
             $this->sortColumn = $sortOptions['column'];
             $this->sortDirection = $sortOptions['direction'];
         }
-
-        /*
-         * Supplied default
-         */
+        // Supplied default
         else {
             if (is_string($this->defaultSort)) {
                 $this->sortColumn = $this->defaultSort;
@@ -1826,9 +1797,7 @@ class Lists extends WidgetBase implements ListElement
             }
         }
 
-        /*
-         * First available column
-         */
+        // First available column
         if ($this->sortColumn === null || !$this->isSortable($this->sortColumn)) {
             $columns = $this->visibleColumns ?: $this->getVisibleColumns();
             $columns = array_filter($columns, function ($column) {
@@ -1891,7 +1860,7 @@ class Lists extends WidgetBase implements ListElement
     //
 
     /**
-     * Event handler to display the list set up.
+     * onLoadSetup handler to display the list set up.
      */
     public function onLoadSetup()
     {
@@ -1902,7 +1871,7 @@ class Lists extends WidgetBase implements ListElement
     }
 
     /**
-     * Event handler to apply the list set up.
+     * onApplySetup handler
      */
     public function onApplySetup()
     {
@@ -1921,7 +1890,7 @@ class Lists extends WidgetBase implements ListElement
     }
 
     /**
-     * Event handler to apply the list set up.
+     * onResetSetup handler
      */
     public function onResetSetup()
     {

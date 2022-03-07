@@ -4,3 +4,8 @@ plugin:
     author: felipe
     icon: oc-icon-adjust
     homepage: ''
+navigation:
+    main-menu-item:
+        label: 'Menu Item'
+        url: /
+        icon: icon-send

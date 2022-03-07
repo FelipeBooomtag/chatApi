@@ -39,7 +39,8 @@
 
     FilterWidget.DEFAULTS = {
         optionsHandler: null,
-        updateHandler: null
+        updateHandler: null,
+        extraData: {}
     }
 
     /*
@@ -146,13 +147,9 @@
             });
 
             $(event.relatedTarget).on('ajaxSetup', '#controlFilterPopover input.filter-search-input', function(event, context){
-                var $form = self.$el.closest('form');
-                if (!$form.length) {
-                    return;
-                }
-
-                $.each($form.serializeArray(), function(key, arr) {
-                    context.options.data[arr.name] = arr.value;
+                var extraData = paramToObj('data-extra-data', self.options.extraData);
+                $.each(extraData, function(key, val) {
+                    context.options.data[key] = val;
                 });
             });
 
@@ -633,6 +630,18 @@
 
     // FILTER WIDGET DATA-API
     // ==============
+
+    function paramToObj(name, value) {
+        if (value === undefined) value = '';
+        if (typeof value == 'object') return value;
+
+        try {
+            return ocJSON("{" + value + "}");
+        }
+        catch (e) {
+            throw new Error('Error parsing the '+name+' attribute value. '+e);
+        }
+    }
 
     $(document).render(function(){
         $('[data-control="filterwidget"]').filterWidget();

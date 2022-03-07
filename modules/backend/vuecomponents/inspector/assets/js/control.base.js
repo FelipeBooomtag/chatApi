@@ -1,4 +1,4 @@
-+(function($) {
+$.oc.module.register('backend.component.inspector.control.base', function () {
     'use strict';
     var ControlBase = {
         props: {
@@ -145,4 +145,4 @@
     }
 
     $.oc.vueComponentHelpers.inspector.controlBase = ControlBase;
-})(window.jQuery);
+});

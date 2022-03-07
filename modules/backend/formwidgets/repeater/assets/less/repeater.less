@@ -60,6 +60,15 @@
         border-radius: 3px;
         text-align: center;
         margin: -2px 2px;
+
+        [class^="octo-icon"] {
+            position: relative;
+            top: 1px;
+        }
+
+        .octo-icon-list-reorder {
+            font-size: 24px;
+        }
     }
 
     a.repeater-item-handle {
@@ -82,6 +91,39 @@
     }
 }
 
+.form-group.span-adaptive {
+    > .field-repeater {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        background: white;
+        padding: @padding-standard;
+        overflow: auto;
+
+        &[data-external-toolbar-app-state] {
+            > .field-repeater-toolbar {
+                display: none;
+            }
+
+            > .field-repeater-builder {
+                > .field-repeater-toolbar {
+                    display: none;
+                }
+
+                > .field-repeater-groups {
+                    padding-top: 0!important;
+                }
+            }
+        }
+
+        &.repeater-empty {
+            background-image: url('../../../../../backend/assets/images/no-blocks.svg');
+            background-repeat: no-repeat;
+            background-position: center center;
+        }
+    }
+}
+
 .field-repeater.repeater-mode-builder {
     display: flex;
 
@@ -97,7 +139,7 @@
     }
 
     > .field-repeater-builder {
-        min-width: 250px;
+        width: 250px;
         padding-right: 20px;
     }
 }

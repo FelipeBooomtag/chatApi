@@ -18,8 +18,28 @@
   max-height: 700px;
   overflow: auto;
 }
-.field-fileupload.size-adaptive {
+.field-fileupload.size-auto {
   overflow: auto;
+}
+.field-fileupload.size-adaptive {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: white;
+}
+.field-fileupload.size-adaptive .uploader-control-container {
+  border: none!important;
+  padding: 14px;
+}
+.field-fileupload.size-adaptive .empty-state {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.field-fileupload.size-adaptive.is-populated .empty-state {
+  display: none;
 }
 .field-fileupload .upload-object {
   position: relative;
@@ -43,7 +63,7 @@
 }
 .field-fileupload .upload-object h4.filename {
   font-weight: 500;
-  margin-top: 0;
+  margin-top: -2px;
 }
 .field-fileupload .upload-object.upload-object-image h4.filename {
   padding-top: 10px;
@@ -70,12 +90,16 @@
 }
 .field-fileupload .upload-object a.drag-handle {
   position: absolute;
+  display: none;
   color: #72809d;
-  display: block;
-  left: 5px;
+  cursor: move;
+  left: -1px;
   top: 23px;
-  font-size: 13px;
+  font-size: 24px;
   text-decoration: none;
+}
+.field-fileupload .upload-object:hover a.drag-handle {
+  display: block;
 }
 .field-fileupload .upload-object .custom-checkbox-v2 {
   position: absolute;
@@ -83,6 +107,9 @@
   top: 3px;
 }
 .field-fileupload.is-preview .upload-object .custom-checkbox-v2 {
+  display: none;
+}
+.field-fileupload .empty-state {
   display: none;
 }
 .field-fileupload .upload-object .icon-container:after {
@@ -138,7 +165,7 @@
   display: none;
 }
 .field-fileupload .upload-object.is-error .drag-handle {
-  display: none;
+  display: none !important;
 }
 .field-fileupload.is-preview .upload-button,
 .field-fileupload.is-preview a.drag-handle {
@@ -277,7 +304,7 @@
   position: absolute;
 }
 .field-fileupload.is-file .upload-object.upload-object-file .icon-container i {
-  margin-top: 3px;
+  margin-top: 4px;
   margin-left: 3px;
   display: none;
 }
@@ -307,14 +334,15 @@
   content: ')';
 }
 .field-fileupload.is-file .upload-object.upload-object-file .custom-checkbox-v2 {
-  top: 6px;
+  top: 7px;
 }
 .field-fileupload.is-file .upload-object.upload-object-file.mode-multi .file-data-container {
   margin-left: 43px;
 }
 .field-fileupload.is-file .upload-object.upload-object-file.mode-multi .drag-handle {
-  left: 27px;
-  top: 5px;
+  display: block;
+  left: 24px;
+  top: 0;
 }
 .field-fileupload.is-file .upload-object.upload-object-file.is-success .icon-container i {
   display: inline-block;
@@ -357,6 +385,9 @@
   white-space: nowrap;
 }
 .field-fileupload .uploader-control-container .uploader-control-toolbar .backend-toolbar-button.populated-only {
+  display: none;
+}
+.field-fileupload .uploader-control-container.external-toolbar .uploader-control-toolbar {
   display: none;
 }
 .field-fileupload.file-drag-over .uploader-control-container {

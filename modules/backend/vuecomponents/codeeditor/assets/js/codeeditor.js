@@ -1,4 +1,4 @@
-(function() {
+$.oc.module.register('backend.component.codeeditor', function () {
     $(document).ready(function() {
         // Fix EMMET HTML when syntax is Twig
         //
@@ -257,4 +257,4 @@
         },
         template: '#backend_vuecomponents_codeeditor'
     });
-})();
+});

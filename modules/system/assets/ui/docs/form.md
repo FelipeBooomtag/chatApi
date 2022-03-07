@@ -161,17 +161,17 @@
 
             <div class="checkbox custom-checkbox">
                 <input id="checkbox-example1" name="checkbox" value="1" type="checkbox">
-                <label class="choice" for="checkbox-example1" class="storm-icon-pseudo"> Dodge Viper</label>
+                <label class="choice storm-icon-pseudo" for="checkbox-example1"> Dodge Viper</label>
                 <p class="help-block">Do not send new comment notifications.</p>
             </div>
             <div class="checkbox custom-checkbox">
                 <input checked="checked" id="checkbox-example2" name="checkbox" value="2" type="checkbox">
-                <label class="choice" for="checkbox-example2" class="storm-icon-pseudo"> GM Corvette</label>
+                <label class="choice storm-icon-pseudo" for="checkbox-example2"> GM Corvette</label>
                 <p class="help-block">Send new comment notifications only to post author.</p>
             </div>
             <div class="checkbox custom-checkbox">
                 <input id="checkbox-example3" name="checkbox" value="3" type="checkbox">
-                <label class="choice" for="checkbox-example3" class="storm-icon-pseudo"> Porsche Boxter</label>
+                <label class="choice storm-icon-pseudo" for="checkbox-example3"> Porsche Boxter</label>
                 <p class="help-block">Notify all users who have permissions to receive blog notifications.</p>
             </div>
         </div>

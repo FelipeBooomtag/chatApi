@@ -1,4 +1,4 @@
-(function () {
+$.oc.module.register('backend.component.richeditor.document.connector', function () {
     var utils = $.oc.module.import('backend.vuecomponents.richeditordocumentconnector.utils');
     var octoberCommands = $.oc.module.import('backend.vuecomponents.richeditordocumentconnector.octobercommands');
 
@@ -577,4 +577,4 @@
         },
         template: '#backend_vuecomponents_richeditordocumentconnector'
     });
-})();
+});

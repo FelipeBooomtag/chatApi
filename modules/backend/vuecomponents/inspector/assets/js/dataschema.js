@@ -1,4 +1,4 @@
-+function ($) { "use strict";
+$.oc.module.register('backend.component.inspector.dataschema', function () {
     var inspectorDataSchema = {
         type: 'array',
         items: {
@@ -65,4 +65,4 @@
     }
 
     $.oc.vueComponentHelpers.inspector.dataSchema = inspectorDataSchema;
-}(window.jQuery);
+});

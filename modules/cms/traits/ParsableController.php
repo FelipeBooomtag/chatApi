@@ -30,7 +30,7 @@ trait ParsableController
      */
     protected function parseRouteParamsOnComponent(ComponentBase $component, array $params = [], array $properties = null, string $propPrefix = '')
     {
-        $properties = $properties ?: $component->getProperties();
+        $properties = $properties !== null ? $properties : $component->getProperties();
 
         foreach ($properties as $propName => $propValue) {
             if (is_array($propValue)) {
@@ -51,7 +51,7 @@ trait ParsableController
      */
     protected function parseEnvironmentVarsOnComponent(ComponentBase $component, array $vars = [], array $properties = null, string $propPrefix = '')
     {
-        $properties = $properties ?: $component->getProperties();
+        $properties = $properties !== null ? $properties : $component->getProperties();
 
         foreach ($properties as $propName => $propValue) {
             if (is_array($propValue)) {
@@ -72,7 +72,7 @@ trait ParsableController
      */
     protected function parseEnvironmentVarsOnTemplate(CmsObject $template, array $vars = [], array $attributes = null, string $attrPrefix = '')
     {
-        $attributes = $attributes ?: $template->getParsableAttributeValues();
+        $attributes = $attributes !== null ? $attributes : $template->getParsableAttributeValues();
 
         foreach ($attributes as $attrName => $attrValue) {
             if (is_array($attrValue)) {

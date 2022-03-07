@@ -4,14 +4,22 @@
 
 <?php else: ?>
 
-    <?php switch ($mode):
+    <?php switch ($displayMode):
 
-        case 'image': ?>
+        case 'image-single': ?>
             <?= $this->makePartial('image_single') ?>
         <?php break ?>
 
-        <?php case 'file': ?>
+        <?php case 'image-multi': ?>
+            <?= $this->makePartial('image_multi') ?>
+        <?php break ?>
+
+        <?php case 'file-single': ?>
             <?= $this->makePartial('file_single') ?>
+        <?php break ?>
+
+        <?php case 'file-multi': ?>
+            <?= $this->makePartial('file_multi') ?>
         <?php break ?>
 
     <?php endswitch ?>

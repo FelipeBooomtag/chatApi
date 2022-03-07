@@ -1,6 +1,6 @@
 <!-- Template for new file -->
 <script type="text/template" id="<?= $this->getId('template') ?>">
-    <div class="upload-object upload-object-file dz-preview dz-file-preview <?php if (isset($modeMulti)): ?>mode-multi<?php endif?>">
+    <div class="upload-object upload-object-file dz-preview dz-file-preview <?= isset($modeMulti) ? 'mode-multi' : '' ?>">
         <?php if (isset($modeMulti)): ?>
             <div class="custom-checkbox-v2">
                 <label>
@@ -13,7 +13,7 @@
                 </label>
             </div>
 
-            <a href="javascript:;" class="drag-handle"><i class="icon-bars"></i></a>
+            <a href="javascript:;" class="drag-handle"><i class="octo-icon-list-reorder"></i></a>
         <?php endif ?>
 
         <div class="file-data-container">

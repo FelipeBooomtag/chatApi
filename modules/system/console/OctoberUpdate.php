@@ -58,7 +58,7 @@ class OctoberUpdate extends Command
         }
 
         try {
-            $this->output->success(sprintf('System Updated to v%s', UpdateManager::instance()->getCurrentVersion()));
+            $this->output->success('System Update Complete');
         }
         catch (Exception $ex) {
             // ...

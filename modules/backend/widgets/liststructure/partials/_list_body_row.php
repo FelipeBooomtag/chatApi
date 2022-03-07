@@ -14,7 +14,10 @@
     <?php if ($showCheckboxes): ?>
         <?= $this->makePartial('list_body_checkbox', ['record' => $record]) ?>
     <?php endif ?>
-    <?php $index = $action = 0; foreach ($columns as $key => $column): ?>
+    <?php if ($showReorder): ?>
+        <?= $this->makePartial('list_body_reorder', ['record' => $record]) ?>
+    <?php endif ?>
+    <?php $index = $action = 0; $total = count($columns); foreach ($columns as $key => $column): ?>
         <?php
             $index++;
             $classes = [
@@ -29,6 +32,8 @@
                 $classes[] = 'nolink';
             }
 
+            $isLastWithSetup = $showSetup && $index === $total;
+
             $styles = '';
             $isTreeCell = $index === 1 && $useStructure;
             if ($isTreeCell) {
@@ -36,7 +41,7 @@
                 $styles = 'padding-left:'.$this->getIndentStartSize($treeLevel).'px';
             }
         ?>
-        <td class="<?= implode(' ', $classes) ?>" style="<?= $styles ?>">
+        <td class="<?= implode(' ', $classes) ?>" style="<?= $styles ?>" <?= $isLastWithSetup ? 'colspan="2"' : '' ?>>
             <?php if ($isTreeCell): ?>
                 <?= $this->makePartial('list_body_tree', [
                     'treeLevel' => $treeLevel,
@@ -54,10 +59,6 @@
             <?php endif ?>
         </td>
     <?php endforeach ?>
-
-    <?php if ($showSetup): ?>
-        <td class="list-setup">&nbsp;</td>
-    <?php endif ?>
 </tr>
 
 <?php if ($showTree && $expanded): ?>

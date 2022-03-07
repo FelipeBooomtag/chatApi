@@ -588,11 +588,7 @@ class Controller
     {
         $useCache = Config::get('cms.enable_twig_cache', true);
         $isDebugMode = System::checkDebugMode();
-        // @deprecated 2 lines below
-        $strictVariables = Config::get('cms.enable_twig_strict_variables', false);
-        $strictVariables = Config::get('cms.strict_variables', $strictVariables ?? $isDebugMode);
-        // Use 1 line below when removed
-        // $strictVariables = Config::get('cms.strict_variables', false);
+        $strictVariables = Config::get('cms.strict_variables', false);
         $forceBytecode = Config::get('cms.force_bytecode_invalidation', false);
 
         $options = [
@@ -613,13 +609,25 @@ class Controller
         $twig->addExtension(new CmsTwigExtension($this));
         $twig->addExtension(new SystemTwigExtension);
 
-        // @deprecated v2 should be default
-        if (env('CMS_SECURITY_POLICY_V2', false)) {
-            $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicyV2, true));
+        // @deprecated use code below in v3
+        if (System::checkSafeMode()) {
+            if (env('CMS_SECURITY_POLICY_V2', false)) {
+                $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicy, true));
+            }
+            else {
+                $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicyLegacy, true));
+            }
         }
-        else {
-            $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicy, true));
-        }
+
+        // @deprecated use the main policy in safe mode only
+        // if (System::checkSafeMode()) {
+        //     if (env('CMS_SECURITY_POLICY_V1', false)) {
+        //         $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicyLegacy, true));
+        //     }
+        //     else {
+        //         $twig->addExtension(new SandboxExtension(new \System\Twig\SecurityPolicy, true));
+        //     }
+        // }
 
         if ($isDebugMode) {
             $twig->addExtension(new DebugExtension($this));
@@ -961,8 +969,61 @@ class Controller
     }
 
     /**
-     * Renders a requested partial.
-     * The framework uses this method internally.
+     * loadPartialObject loads a partial for rendering.
+     * @return Partial|false
+     */
+    public function loadPartialObject($name)
+    {
+        // Alias @ symbol for ::
+        if (substr($name, 0, 1) === '@') {
+            $name = '::' . substr($name, 1);
+        }
+
+        // Process Component partial
+        if (strpos($name, '::') !== false) {
+            [$componentAlias, $partialName] = explode('::', $name);
+
+            // Component alias not supplied
+            if (!strlen($componentAlias)) {
+                if ($this->componentContext !== null) {
+                    $componentObj = $this->componentContext;
+                }
+                elseif (($componentObj = $this->findComponentByPartial($partialName)) === null) {
+                    return false;
+                }
+            }
+            // Component alias is supplied
+            elseif (($componentObj = $this->findComponentByName($componentAlias)) === null) {
+                return false;
+            }
+
+            $this->componentContext = $componentObj;
+
+            // Check if the theme has an override
+            $partial = ComponentPartial::loadOverrideCached($this->theme, $componentObj, $partialName);
+
+            // Check the component partial
+            if ($partial === null) {
+                $partial = ComponentPartial::loadCached($componentObj, $partialName);
+            }
+
+            if ($partial === null) {
+                return false;
+            }
+
+            // Set context for self access
+            $this->vars['__SELF__'] = $componentObj;
+        }
+        // Process theme partial
+        elseif (($partial = Partial::loadCached($this->theme, $name)) === null) {
+            return false;
+        }
+
+        return $partial;
+    }
+
+    /**
+     * renderPartial renders a requested partial. The framework uses this method internally.
      * @param string $name The view to load.
      * @param array $parameters Parameter variables to pass to the view.
      * @param bool $throwException Throw an exception if the partial is not found.
@@ -972,13 +1033,6 @@ class Controller
     {
         $vars = $this->vars;
         $this->vars = array_merge($this->vars, $parameters);
-
-        /*
-         * Alias @ symbol for ::
-         */
-        if (substr($name, 0, 1) === '@') {
-            $name = '::' . substr($name, 1);
-        }
 
         /**
          * @event cms.page.beforeRenderPartial
@@ -1000,79 +1054,20 @@ class Controller
         if ($event = $this->fireSystemEvent('cms.page.beforeRenderPartial', [$name])) {
             $partial = $event;
         }
-        /*
-         * Process Component partial
-         */
-        elseif (strpos($name, '::') !== false) {
-            [$componentAlias, $partialName] = explode('::', $name);
-
-            /*
-             * Component alias not supplied
-             */
-            if (!strlen($componentAlias)) {
-                if ($this->componentContext !== null) {
-                    $componentObj = $this->componentContext;
-                }
-                elseif (($componentObj = $this->findComponentByPartial($partialName)) === null) {
-                    if ($throwException) {
-                        throw new CmsException(Lang::get('cms::lang.partial.not_found_name', ['name'=>$partialName]));
-                    }
-
-                    return false;
-                }
-            }
-            /*
-             * Component alias is supplied
-             */
-            elseif (($componentObj = $this->findComponentByName($componentAlias)) === null) {
-                if ($throwException) {
-                    throw new CmsException(Lang::get('cms::lang.component.not_found', ['name'=>$componentAlias]));
-                }
-
-                return false;
-            }
-
-            $this->componentContext = $componentObj;
-
-            /*
-             * Check if the theme has an override
-             */
-            $partial = ComponentPartial::loadOverrideCached($this->theme, $componentObj, $partialName);
-
-            /*
-             * Check the component partial
-             */
-            if ($partial === null) {
-                $partial = ComponentPartial::loadCached($componentObj, $partialName);
-            }
-
-            if ($partial === null) {
-                if ($throwException) {
-                    throw new CmsException(Lang::get('cms::lang.partial.not_found_name', ['name'=>$name]));
-                }
-
-                return false;
-            }
-
-            /*
-             * Set context for self access
-             */
-            $this->vars['__SELF__'] = $componentObj;
+        else {
+            $partial = $this->loadPartialObject($name, $throwException);
         }
-        /*
-         * Process theme partial
-         */
-        elseif (($partial = Partial::loadCached($this->theme, $name)) === null) {
+
+        if ($partial === false) {
             if ($throwException) {
                 throw new CmsException(Lang::get('cms::lang.partial.not_found_name', ['name'=>$name]));
             }
-
-            return false;
+            else {
+                return false;
+            }
         }
 
-        /*
-         * Run functions for CMS partials only (Cms\Classes\Partial)
-         */
+        // Run functions for CMS partials only (Cms\Classes\Partial)
         if ($partial instanceof Partial) {
             $this->partialStack->stackPartial();
 
@@ -1120,9 +1115,7 @@ class Controller
             CmsException::unmask();
         }
 
-        /*
-         * Render the partial
-         */
+        // Render the partial
         CmsException::mask($partial, 400);
         $this->loader->setObject($partial);
         $template = $this->twig->load($partial->getFilePath());
@@ -1160,11 +1153,24 @@ class Controller
     }
 
     /**
-     * Renders a requested content file.
-     * The framework uses this method internally.
+     * loadContentObject loads content for rendering.
+     * @return Content|false
+     */
+    public function loadContentObject($name)
+    {
+        // Load content from theme
+        if (($content = Content::loadCached($this->theme, $name)) === null) {
+            return false;
+        }
+
+        return $content;
+    }
+
+    /**
+     * renderContent renders a requested content file. The framework uses this method internally.
      * @param string $name The content view to load.
      * @param array $parameters Parameter variables to pass to the view.
-     * @return string
+     * @return mixed Contents or false if now throwing an exception.
      */
     public function renderContent($name, $parameters = [], $throwException = true)
     {
@@ -1188,15 +1194,17 @@ class Controller
         if ($event = $this->fireSystemEvent('cms.page.beforeRenderContent', [$name])) {
             $content = $event;
         }
-        /*
-         * Load content from theme
-         */
-        elseif (($content = Content::loadCached($this->theme, $name)) === null) {
+        else {
+            $content = $this->loadContentObject($name);
+        }
+
+        if ($content === false) {
             if ($throwException) {
                 throw new CmsException(Lang::get('cms::lang.content.not_found_name', ['name'=>$name]));
             }
-
-            return false;
+            else {
+                return false;
+            }
         }
 
         $fileContent = $content->parsedMarkup;

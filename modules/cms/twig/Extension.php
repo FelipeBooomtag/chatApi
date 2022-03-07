@@ -40,9 +40,12 @@ class Extension extends TwigExtension
         return [
             new TwigSimpleFunction('page', [$this, 'pageFunction'], ['is_safe' => ['html']]),
             new TwigSimpleFunction('partial', [$this, 'partialFunction'], ['is_safe' => ['html']]),
+            new TwigSimpleFunction('hasPartial', [$this, 'hasPartialFunction'], ['is_safe' => ['html']]),
             new TwigSimpleFunction('content', [$this, 'contentFunction'], ['is_safe' => ['html']]),
+            new TwigSimpleFunction('hasContent', [$this, 'hasContentFunction'], ['is_safe' => ['html']]),
             new TwigSimpleFunction('component', [$this, 'componentFunction'], ['is_safe' => ['html']]),
             new TwigSimpleFunction('placeholder', [$this, 'placeholderFunction'], ['is_safe' => ['html']]),
+            new TwigSimpleFunction('redirect', [$this, 'redirectFunction'], []),
             new TwigSimpleFunction('abort', [$this, 'abortFunction'], []),
         ];
     }
@@ -102,10 +105,9 @@ class Extension extends TwigExtension
     }
 
     /**
-     * partialFunction renders a partial.
-     * @param string $name Specifies the partial name.
-     * @param array $parameters A optional list of parameters to pass to the partial.
-     * @param bool $throwException Throw an exception if the partial is not found.
+     * partialFunction renders a partial based on the partial name. The parameters
+     * are an optional list of view variables. An exception can be thrown if
+     * nothing is found.
      * @return string
      */
     public function partialFunction($name, $parameters = [], $throwException = false)
@@ -114,14 +116,32 @@ class Extension extends TwigExtension
     }
 
     /**
-     * contentFunction renders a content file.
-     * @param string $name Specifies the content block name.
-     * @param array $parameters A optional list of parameters to pass to the content.
+     * hasPartialFunction checks the partials existence without rendering it.
+     * @return bool
+     */
+    public function hasPartialFunction($name)
+    {
+        return (bool) $this->controller->loadPartialObject($name);
+    }
+
+    /**
+     * contentFunction renders a partial based on the file name. The parameters
+     * are an optional list of view variables, otherwise pass false to render nothing
+     * and check the existence. An exception can be thrown if nothing is found.
      * @return string
      */
     public function contentFunction($name, $parameters = [], $throwException = false)
     {
         return $this->controller->renderContent($name, $parameters, $throwException);
+    }
+
+    /**
+     * hasContentFunction checks the content existence without rendering it.
+     * @return bool
+     */
+    public function hasContentFunction($name)
+    {
+        return (bool) $this->controller->loadContentObject($name);
     }
 
     /**
@@ -165,6 +185,23 @@ class Extension extends TwigExtension
     }
 
     /**
+     * redirectFunction will redirect the response to a theme page or URL
+     * @param string $to
+     * @param int $code
+     */
+    public function redirectFunction($to, $parameters = [], $code = 302)
+    {
+        if (is_int($parameters)) {
+            $code = $parameters;
+            $parameters = [];
+        }
+
+        $url = $this->controller->pageUrl($to, $parameters) ?: $to;
+
+        $this->controller->setResponse(Redirect::to($url, $code));
+    }
+
+    /**
      * abortFunction will abort the successful page cycle
      * @param int $code
      * @param string|false $message
@@ -173,12 +210,6 @@ class Extension extends TwigExtension
     {
         if ($message === false) {
             $this->controller->setStatusCode($code);
-            return;
-        }
-
-        if (($code == 302 || $code == 301) && $message) {
-            $url = $this->controller->pageUrl($message) ?: $message;
-            $this->controller->setResponse(Redirect::to($url, $code));
             return;
         }
 

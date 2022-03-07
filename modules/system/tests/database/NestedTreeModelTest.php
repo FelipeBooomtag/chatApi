@@ -50,7 +50,7 @@ class NestedTreeModelTest extends PluginTestCase
             5 => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;November',
             6 => '&nbsp;&nbsp;&nbsp;Summer Breeze',
             7 => 'Category Green',
-            8 => '&nbsp;&nbsp;&nbsp;Winter Snow',
+            8 => '&nbsp;&nbsp;&nbsp;Antarctic Snow',
             9 => '&nbsp;&nbsp;&nbsp;Spring Trees'
         ], $array);
 
@@ -63,7 +63,7 @@ class NestedTreeModelTest extends PluginTestCase
             5 => '----November',
             6 => '--Summer Breeze',
             7 => 'Category Green',
-            8 => '--Winter Snow',
+            8 => '--Antarctic Snow',
             9 => '--Spring Trees'
         ], $array);
 
@@ -76,7 +76,7 @@ class NestedTreeModelTest extends PluginTestCase
             'November' => '****The end of the fall season.',
             'Summer Breeze' => '**Disccusion about the wind at the ocean.',
             'Category Green' => 'A root level test category',
-            'Winter Snow' => '**Disccusion about the frosty snow flakes.',
+            'Antarctic Snow' => '**Disccusion about the frosty snow flakes.',
             'Spring Trees' => '**Disccusion about the blooming gardens.'
         ], $array);
     }
@@ -92,7 +92,7 @@ class NestedTreeModelTest extends PluginTestCase
             5 => '......November (#5)',
             6 => '...Summer Breeze (#6)',
             7 => 'Category Green (#7)',
-            8 => '...Winter Snow (#8)',
+            8 => '...Antarctic Snow (#8)',
             9 => '...Spring Trees (#9)'
         ], $array);
     }
@@ -137,7 +137,7 @@ class NestedTreeModelTest extends PluginTestCase
         ]);
 
         $green->children()->create([
-            'name' => 'Winter Snow',
+            'name' => 'Antarctic Snow',
             'description' => 'Disccusion about the frosty snow flakes.'
         ]);
 

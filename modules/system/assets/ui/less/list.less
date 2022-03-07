@@ -62,6 +62,12 @@ table.table.data {
                 &:hover { color: @color-list-text-active; }
             }
 
+            &.explicit-left-padding {
+                > span {
+                    padding-left: 0;
+                }
+            }
+
             &.sort-desc { .list-head-icon(@angle-down); }
             &.sort-asc { .list-head-icon(@angle-up); }
 
@@ -147,20 +153,32 @@ table.table.data {
             }
         }
 
-        tr.rowlink:not(.nolink):not(.active):hover td,
-        tr:not(.no-data):not(.active).selected td {
-            color: @color-list-text-active;
-            background-color: @table-bg-active;
+        &:not(.tree-drag-mode) {
+            tr.rowlink:not(.nolink):not(.active):hover td,
+            tr:not(.no-data):not(.active).selected td {
+                color: @color-list-text-active;
+                background-color: @table-bg-active;
+    
+                // When hover is white, this targets common objects
+                // a:not(.btn), span, i[class^="icon-"] {
+                //    color: @color-list-hover-text;
+                // }
+            }
 
-            // When hover is white, this targets common objects
-            // a:not(.btn), span, i[class^="icon-"] {
-            //    color: @color-list-hover-text;
-            // }
+            tr.rowlink:not(.nolink).active:hover td,
+            tr:not(.no-data).active.selected td {
+                background: @color-list-hover-bg-active;
+            }
         }
 
-        tr.rowlink:not(.nolink).active:hover td,
-        tr:not(.no-data).active.selected td {
-            background: @color-list-hover-bg-active;
+        tr.sortable-chosen {
+            position: relative;
+            z-index: 1;
+
+            td {
+                color: @color-list-text-active;
+                background-color: @table-bg-active;
+            }
         }
 
         // tr.rowlink:not(.nolink):active td {

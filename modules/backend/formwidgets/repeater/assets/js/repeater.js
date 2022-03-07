@@ -33,6 +33,7 @@
         this.$el = $(element);
         this.itemCount = 0;
         this.canRemove = true;
+        this.repeaterId = $.oc.domIdManager.generate('repeater');
 
         $.oc.foundation.controlUtils.markDisposable(element);
         Base.call(this);
@@ -51,7 +52,7 @@
         useDuplicate: true,
         duplicateHandler: 'onDuplicateItem',
         removeConfirm: 'Are you sure?',
-        displayMode: 'simple',
+        displayMode: 'accordion',
         titleFrom: null,
         minItems: null,
         maxItems: null
@@ -83,16 +84,22 @@
 
         // Toolbar
         this.$toolbar = $(this.selectorToolbar, this.$el);
-        this.$toolbar.on('click', '> [data-repeater-add-group]', this.proxy(this.clickAddGroupButton));
-        this.$toolbar.on('ajaxDone', '> [data-repeater-add]', this.proxy(this.onAddItemSuccess));
+        this.$toolbar.on('click', '> [data-repeater-cmd=add-group]', this.proxy(this.clickAddGroupButton));
+        this.$toolbar.on('ajaxDone', '> [data-repeater-cmd=add]', this.proxy(this.onAddItemSuccess));
 
         this.$el.one('dispose-control', this.proxy(this.dispose));
+
+        this.initToolbarExtensionPoint();
+        this.initExternalToolbarEventBus();
+        this.mountExternalToolbarEventBusEvents();
 
         this.countItems();
         this.togglePrompt();
 
         // @deprecated
         this.applyStyle();
+
+        this.extendExternalToolbar();
     }
 
     Repeater.prototype.dispose = function() {
@@ -116,11 +123,12 @@
         this.$el.off('click', headSelect + ' [data-repeater-duplicate]', this.proxy(this.clickDuplicateItem));
 
         // Toolbar
-        this.$toolbar.off('click', '> [data-repeater-add-group]', this.proxy(this.clickAddGroupButton));
-        this.$toolbar.off('ajaxDone', '> [data-repeater-add]', this.proxy(this.onAddItemSuccess));
+        this.$toolbar.off('click', '> [data-repeater-cmd=add-group]', this.proxy(this.clickAddGroupButton));
+        this.$toolbar.off('ajaxDone', '> [data-repeater-cmd=add]', this.proxy(this.onAddItemSuccess));
 
         this.$el.off('dispose-control', this.proxy(this.dispose));
         this.$el.removeData('oc.repeater');
+        this.unmountExternalToolbarEventBusEvents();
 
         this.$el = null;
         this.$toolbar = null;
@@ -355,7 +363,7 @@
 
     Repeater.prototype.getCollapseTitle = function($item) {
         var $target,
-            defaultText = '',
+            defaultText = this.$el.data('default-title'),
             explicitText = $item.data('item-title');
 
         if (explicitText) {
@@ -466,6 +474,165 @@
 
     Repeater.prototype.countItems = function() {
         this.itemCount = $('> .field-repeater-item', this.$itemContainer).length;
+        this.$el.toggleClass('repeater-empty', this.itemCount === 0);
+    }
+
+    //
+    // External toolbar
+    //
+
+    Repeater.prototype.initToolbarExtensionPoint = function () {
+        if (!this.options.externalToolbarAppState) {
+            return;
+        }
+
+        // Expected format: tailor.app::toolbarExtensionPoint
+        const parts = this.options.externalToolbarAppState.split('::');
+        if (parts.length !== 2) {
+            throw new Error('Invalid externalToolbarAppState format. Expected format: module.name::stateElementName');
+        }
+
+        const app = $.oc.module.import(parts[0]);
+        this.toolbarExtensionPoint = app.state[parts[1]];
+    }
+
+    Repeater.prototype.initExternalToolbarEventBus = function() {
+        if (!this.options.externalToolbarEventBus) {
+            return;
+        }
+
+        // Expected format: tailor.app::eventBus
+        const parts = this.options.externalToolbarEventBus.split('::');
+        if (parts.length !== 2) {
+            throw new Error('Invalid externalToolbarEventBus format. Expected format: module.name::stateElementName');
+        }
+
+        const module = $.oc.module.import(parts[0]);
+        this.externalToolbarEventBusObj = module.state[parts[1]];
+    }
+
+    Repeater.prototype.mountExternalToolbarEventBusEvents = function() {
+        if (!this.externalToolbarEventBusObj) {
+            return;
+        }
+
+        this.externalToolbarEventBusObj.$on('toolbarcmd', this.proxy(this.onToolbarExternalCommand));
+        this.externalToolbarEventBusObj.$on('extendapptoolbar', this.proxy(this.extendExternalToolbar));
+    }
+
+    Repeater.prototype.unmountExternalToolbarEventBusEvents = function() {
+        if (!this.externalToolbarEventBusObj) {
+            return;
+        }
+
+        this.externalToolbarEventBusObj.$off('toolbarcmd', this.proxy(this.onToolbarExternalCommand));
+        this.externalToolbarEventBusObj.$off('extendapptoolbar', this.proxy(this.extendExternalToolbar));
+    }
+
+    Repeater.prototype.onToolbarExternalCommand = function (ev) {
+        var cmdPrefix = 'repeater-toolbar-';
+
+        if (ev.command.substring(0, cmdPrefix.length) != cmdPrefix) {
+            return;
+        }
+
+        if (/^repeater-toolbar-add,/.test(ev.command)) {
+            return this.onAddItemClick(ev.command);
+        }
+
+        var cmd = ev.command.substring(cmdPrefix.length),
+            $toolbar = this.$el.find('> .field-repeater-builder > .field-repeater-toolbar, > .field-repeater-toolbar'),
+            $button = $toolbar.find('[data-repeater-cmd='+cmd+']');
+
+        $button.get(0).click(ev.ev);
+    }
+
+    Repeater.prototype.onAddItemClick = function (cmd) {
+        var parts = cmd.split(',');
+
+        if (parts[1] != this.repeaterId) {
+            return;
+        }
+
+        var requestData = ocJSON('{' + parts[3] + '}'),
+            that = this;
+
+        this.externalToolbarEventBusObj.$emit('documentloadingstart');
+        this.$el.request(
+            parts[2],
+            {
+                data: requestData
+            }
+        ).always(function () {
+            that.externalToolbarEventBusObj.$emit('documentloadingend');
+            that.countItems();
+        });
+    }
+
+    Repeater.prototype.buildAddMenuItems = function () {
+        if (this.addMenuItems) {
+            return this.addMenuItems;
+        }
+
+        var templateHtml = $('> [data-group-palette-template]', this.$el).html(),
+            templateContainer = $(templateHtml),
+            that = this;
+
+        this.addMenuItems = [];
+
+        templateContainer.find('ul > li > a').each(function () {
+            var $link = $(this),
+                $icon = $link.find('i.list-icon');
+
+            that.addMenuItems.push({
+                type: 'text',
+                label: $link.find('.title').text(),
+                icon: $icon.attr('class'),
+                command: 'repeater-toolbar-add,' + that.repeaterId + ',' + $link.data('request') + ',' + $link.data('requestData')
+            });
+        });
+
+        return this.addMenuItems;
+    }
+
+    Repeater.prototype.extendExternalToolbar = function () {
+        if (!this.$el.is(":visible") || !this.toolbarExtensionPoint) {
+            return;
+        }
+
+        this.toolbarExtensionPoint.splice(0, this.toolbarExtensionPoint.length);
+
+        this.toolbarExtensionPoint.push({
+            type: 'separator'
+        });
+
+        var that = this,
+            $buttons = this.$el.find('> .field-repeater-builder > .field-repeater-toolbar a, > .field-repeater-toolbar a');
+
+        $buttons.each(function () {
+            var $button = $(this),
+                $icon = $button.find('i[class*=icon]'),
+                menuitems = [],
+                isAddButton = $button.data('repeaterCmd') == 'add-group';
+
+            if (isAddButton) {
+                menuitems = that.buildAddMenuItems();
+            }
+            else {
+                menuitems = false;
+            }
+
+            that.toolbarExtensionPoint.push(
+                {
+                    type: isAddButton ? 'dropdown' : 'button',
+                    icon: $icon.attr('class'),
+                    label: $button.text(),
+                    command: 'repeater-toolbar-' + $button.attr('data-repeater-cmd'),
+                    disabled: $button.attr('disabled') !== undefined,
+                    menuitems: menuitems
+                }
+            );
+        });
     }
 
     // FIELD REPEATER PLUGIN DEFINITION

@@ -5,7 +5,7 @@ use Twig\TwigFilter as TwigSimpleFilter;
 use Media\Classes\MediaLibrary;
 
 /**
- * The Media Twig extension class implements common Twig functions and filters.
+ * Extension for Twig used by the Media module
  *
  * @package october\media
  * @author Alexey Bobkov, Samuel Georges
@@ -13,9 +13,8 @@ use Media\Classes\MediaLibrary;
 class Extension extends TwigExtension
 {
     /**
-     * Returns a list of functions to add to the existing list.
-     *
-     * @return array An array of functions
+     * getFunctions returns a list of functions to add to the existing list.
+     * @return array
      */
     public function getFunctions()
     {
@@ -23,9 +22,8 @@ class Extension extends TwigExtension
     }
 
     /**
-     * Returns a list of filters this extensions provides.
-     *
-     * @return array An array of filters
+     * getFilters returns a list of filters this extensions provides.
+     * @return array
      */
     public function getFilters()
     {
@@ -37,9 +35,8 @@ class Extension extends TwigExtension
     }
 
     /**
-     * Returns a list of token parsers this extensions provides.
-     *
-     * @return array An array of token parsers
+     * getTokenParsers returns a list of token parsers this extensions provides.
+     * @return array
      */
     public function getTokenParsers()
     {
@@ -47,8 +44,8 @@ class Extension extends TwigExtension
     }
 
     /**
-     * Converts supplied file to a URL relative to the media library.
-     * @param string $file Specifies the media-relative file
+     * mediaFilter converts supplied file to a URL relative to the media library.
+     * @param mixed $file
      * @return string
      */
     public function mediaFilter($file)

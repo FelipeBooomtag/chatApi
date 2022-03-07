@@ -6,8 +6,8 @@
     ];
 
     if ($useRowLink) $classes[] = 'list-rowlink';
+    if ($showCheckboxes) $classes[] = 'list-checkboxes';
     if (!$showPagination) $classes[] = 'no-pagination';
-    if (!$showReorder) $classes[] = 'list-no-reorder';
 ?>
 <div
     class="control-list <?= implode(' ', $classes) ?>"

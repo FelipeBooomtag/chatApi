@@ -315,7 +315,7 @@ class RelationController extends ControllerBehavior
             ]));
         }
 
-        if (!$this->getConfig($field)) {
+        if (!$this->relationHasField($field)) {
             throw new ApplicationException(Lang::get('backend::lang.relation.missing_definition', compact('field')));
         }
 
@@ -397,6 +397,14 @@ class RelationController extends ControllerBehavior
             $this->controller->relationExtendPivotWidget($this->pivotWidget, $this->field, $this->model);
             $this->pivotWidget->bindToController();
         }
+    }
+
+    /**
+     * relationHasField
+     */
+    public function relationHasField(string $field): bool
+    {
+        return (bool) $this->getConfig($field);
     }
 
     /**
@@ -569,6 +577,7 @@ class RelationController extends ControllerBehavior
 
         $filterConfig = $this->makeConfig($this->getConfig($type . '[filter]'));
         $filterConfig->alias = $this->alias . ucfirst($type) . 'Filter';
+        $filterConfig->extraData = ['_relation_field' => $this->field];
         $filterWidget = $this->makeWidget(\Backend\Widgets\Filter::class, $filterConfig);
 
         return $filterWidget;

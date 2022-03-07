@@ -34,6 +34,11 @@ class Filter extends WidgetBase
      */
     public $context;
 
+    /**
+     * @var array|null extraData to pass with the filter requests.
+     */
+    public $extraData;
+
     //
     // Object properties
     //
@@ -71,6 +76,7 @@ class Filter extends WidgetBase
         $this->fillFromConfig([
             'scopes',
             'context',
+            'extraData',
         ]);
     }
 
@@ -91,6 +97,7 @@ class Filter extends WidgetBase
         $this->defineFilterScopes();
         $this->vars['cssClasses'] = implode(' ', $this->cssClasses);
         $this->vars['scopes'] = $this->allScopes;
+        $this->vars['extraData'] = $this->extraData;
     }
 
     /**
@@ -104,7 +111,7 @@ class Filter extends WidgetBase
             case 'date':
                 if ($scope->value && $scope->value instanceof Carbon) {
                     $params['dateStr'] = Backend::dateTime($scope->value, ['formatAlias' => 'dateMin']);
-                    $params['date']    = $scope->value->format('Y-m-d H:i:s');
+                    $params['date'] = $scope->value->format('Y-m-d H:i:s');
                 }
 
                 break;
@@ -119,20 +126,20 @@ class Filter extends WidgetBase
 
                     if (strcasecmp($after, '0000-01-01 00:00:00') > 0) {
                         $params['afterStr'] = Backend::dateTime($scope->value[0], ['formatAlias' => 'dateMin']);
-                        $params['after']    = $after;
+                        $params['after'] = $after;
                     }
                     else {
                         $params['afterStr'] = '∞';
-                        $params['after']    = null;
+                        $params['after'] = null;
                     }
 
                     if (strcasecmp($before, '2999-12-31 23:59:59') < 0) {
                         $params['beforeStr'] = Backend::dateTime($scope->value[1], ['formatAlias' => 'dateMin']);
-                        $params['before']    = $before;
+                        $params['before'] = $before;
                     }
                     else {
                         $params['beforeStr'] = '∞';
-                        $params['before']    = null;
+                        $params['before'] = null;
                     }
                 }
                 break;

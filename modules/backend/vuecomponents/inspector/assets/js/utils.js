@@ -1,5 +1,4 @@
-+(function($) {
-    'use strict';
+$.oc.module.register('backend.component.inspector.utils', function () {
     var InspectorUtils = function() {
         var validator = null;
 
@@ -245,4 +244,4 @@
     }
 
     $.oc.vueComponentHelpers.inspector.utils = new InspectorUtils();
-})(window.jQuery);
+});

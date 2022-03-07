@@ -2,6 +2,7 @@
 
 use Backend\Widgets\Form;
 use Backend\Classes\FormWidgetBase;
+use October\Rain\Database\Model;
 
 /**
  * NestedForm widget
@@ -125,7 +126,7 @@ class NestedForm extends FormWidgetBase
     {
         [$model, $attribute] = $this->resolveModelAttribute($this->valueFrom);
 
-        if ($model && $model->hasRelation($attribute)) {
+        if ($model instanceof Model && $model->hasRelation($attribute)) {
             $this->useRelation = true;
         }
     }

@@ -4,50 +4,64 @@
 
 @tree-control-size: 24px;
 
-.control-list.list-no-reorder table.table.data {
-    a.tree-expand-collapse {
-        margin-left: -(24px + 5px);
-    }
-}
-
 table.table.data {
     //
     // Trees
     //
 
-    tr:nth-child(even) td {
-        a.tree-reorder-handle,
-        a.tree-expand-collapse {
-            background-color: white;
+    tr:hover .list-reorder {
+        span.list-reorder-handle {
+            display: block;
         }
     }
 
-    .list-cell-tree {
-        padding: 0;
+    tbody.tree-drag-mode {
+        &, * {
+            cursor: move!important;
+        }
+
+        td.list-reorder span.list-reorder-handle {
+            display: none;
+        }
+
+        tr.sortable-chosen td.list-reorder span.list-reorder-handle {
+            display: block;
+        }
+    }
+
+    tbody.tree-drag-updated {
+        td.list-reorder span.list-reorder-handle {
+            display: none !important;
+        }
+    }
+
+    th.list-reorder,
+    td.list-reorder {
+        width: @tree-control-size;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    td.list-reorder {
         vertical-align: middle;
         position: relative;
-        -webkit-transition: padding 0.3s ease;
-        transition: padding 0.3s ease;
 
-        a.tree-reorder-handle,
-        a.tree-expand-collapse {
+        span.list-reorder-handle {
+            display: none;
+            background: white;
+            text-align: center;
+            cursor: move;
+            left: -6px;
+
             width: @tree-control-size;
             height: @tree-control-size;
-            display: block;
             position: absolute;
             top: calc(50% - 12px);
             border-radius: 3px;
-            background: @color-list-accent;
             text-decoration: none;
-        }
 
-        a.tree-reorder-handle {
-            text-align: center;
-            cursor: move;
-            margin-left: -(24px + 5px);
-
-            span {
-                position: relative;
+            i {
+                font-size: 24px;
                 top: 2px;
             }
 
@@ -55,13 +69,26 @@ table.table.data {
                 background: @background-color-focus;
             }
         }
+    }
+
+    td.list-cell-tree {
+        vertical-align: middle;
+        position: relative;
+        -webkit-transition: padding 0.3s ease;
+        transition: padding 0.3s ease;
 
         a.tree-expand-collapse {
-            margin-left: -(48px + 10px);
+            width: @tree-control-size;
+            height: @tree-control-size;
+            display: block;
+            position: absolute;
+            top: calc(50% - 12px);
+            border-radius: 3px;
+            text-decoration: none;
+        }
 
-            &:hover {
-                background: @background-color-focus;
-            }
+        a.tree-expand-collapse {
+            margin-left: -25px;
 
             > span {
                 position: absolute;
@@ -88,6 +115,19 @@ table.table.data {
                 .icon(@angle-down);
                 left: calc(100% - 17px);
             }
+        }
+    }
+}
+
+.control-list.list-checkboxes table.table.data {
+    th.list-reorder,
+    td.list-reorder {
+        width: @tree-control-size - 6px;
+    }
+
+    td.list-reorder {
+        span.list-reorder-handle {
+            left: -13px;
         }
     }
 }

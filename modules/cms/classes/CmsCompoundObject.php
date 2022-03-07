@@ -16,7 +16,7 @@ use Twig\Environment as TwigEnvironment;
 use ApplicationException;
 
 /**
- * This is a base class for CMS objects that have multiple sections - pages, partials and layouts.
+ * CmsCompoundObject base class for CMS objects that have multiple sections - pages, partials and layouts.
  * The class implements functionality for the compound object file parsing. It also provides a way
  * to access parameters defined in the INI settings section as the object properties.
  *
@@ -46,7 +46,7 @@ class CmsCompoundObject extends CmsObject
     public $viewBag = [];
 
     /**
-     * @var array The attributes that are mass assignable.
+     * @var array fillable attributes that are mass assignable.
      */
     protected $fillable = [
         'markup',
@@ -55,9 +55,7 @@ class CmsCompoundObject extends CmsObject
     ];
 
     /**
-     * The methods that should be returned from the collection of all objects.
-     *
-     * @var array
+     * @var array passthru methods that should be returned from the collection of all objects.
      */
     protected $passthru = [
         'lists',
@@ -68,17 +66,17 @@ class CmsCompoundObject extends CmsObject
     ];
 
     /**
-     * @var bool Model supports code and settings sections.
+     * @var bool isCompoundObject for models that support code and settings sections.
      */
     protected $isCompoundObject = true;
 
     /**
-     * @var array|null Cache for component properties.
+     * @var array|null objectComponentPropertyMap cache for component properties.
      */
     protected static $objectComponentPropertyMap;
 
     /**
-     * @var mixed Cache store for the getViewBag method.
+     * @var mixed viewBagCache store for the getViewBag method.
      */
     protected $viewBagCache = false;
 
@@ -101,7 +99,7 @@ class CmsCompoundObject extends CmsObject
     }
 
     /**
-     * Create a new Collection instance.
+     * newCollection creates a new Collection instance.
      * @return \October\Rain\Halcyon\Collection
      */
     public function newCollection(array $models = [])
@@ -124,8 +122,8 @@ class CmsCompoundObject extends CmsObject
     }
 
     /**
-     * If the model is loaded with an invalid INI section, the invalid content will be
-     * passed as a special attribute. Look for it, then locate the failure reason.
+     * validateSettings if the model is loaded with an invalid INI section, the invalid content
+     * will be passed as a special attribute. Look for it, then locate the failure reason.
      * @return void
      */
     protected function validateSettings()
@@ -138,7 +136,7 @@ class CmsCompoundObject extends CmsObject
     }
 
     /**
-     * Parses the settings array.
+     * parseSettings array.
      * Child classes can override this method in order to update the content
      * of the $settings property after the object is loaded from a file.
      * @return void
@@ -149,7 +147,7 @@ class CmsCompoundObject extends CmsObject
     }
 
     /**
-     * This method checks if safe mode is enabled by config, and the code
+     * checkSafeMode checks if safe mode is enabled by config, and the code
      * attribute is modified and populated. If so an exception is thrown.
      * @return void
      */
@@ -167,7 +165,7 @@ class CmsCompoundObject extends CmsObject
     //
 
     /**
-     * Runs components defined in the settings
+     * runComponents defined in the settings
      * Process halts if a component returns a value
      * @return void
      */
@@ -212,7 +210,7 @@ class CmsCompoundObject extends CmsObject
     }
 
     /**
-     * Returns a component by its name.
+     * getComponent returns a component by its name.
      * This method is used only in the back-end and for internal system needs when
      * the standard way to access components is not an option.
      * @param string $componentName Specifies the component name.
@@ -232,14 +230,15 @@ class CmsCompoundObject extends CmsObject
     }
 
     /**
-     * Checks if the object has a component with the specified name.
+     * hasComponent checks if the object has a component with the specified name. Returns
+     * false or the full component name used on the page (it could include the alias).
      * @param string $componentName Specifies the component name.
-     * @return mixed Return false or the full component name used on the page (it could include the alias).
+     * @return mixed
      */
     public function hasComponent($componentName)
     {
         $componentManager = ComponentManager::instance();
-        $componentName = $componentManager->resolve($componentName);
+        $componentName = $componentManager->resolve($componentName) ?: $componentName;
 
         foreach ($this->settings['components'] as $sectionName => $values) {
             $result = $sectionName;
@@ -267,7 +266,7 @@ class CmsCompoundObject extends CmsObject
     }
 
     /**
-     * Returns component property names and values.
+     * getComponentProperties returns component property names and values.
      * This method implements caching and can be used in the run-time on the front-end.
      * @param string $componentName Specifies the component name.
      * @return array Returns an associative array with property names in the keys and property values in the values.
@@ -360,7 +359,7 @@ class CmsCompoundObject extends CmsObject
     //
 
     /**
-     * Returns the configured view bag component.
+     * getViewBag returns the configured view bag component.
      * This method is used only in the back-end and for internal system needs when
      * the standard way to access components is not an option.
      * @return \Cms\Components\ViewBag Returns the view bag component instance.
@@ -384,7 +383,7 @@ class CmsCompoundObject extends CmsObject
     }
 
     /**
-     * Copies view bag properties to the view bag array.
+     * fillViewBagArray copies view bag properties to the view bag array.
      * This is required for the back-end editors.
      * @return void
      */
@@ -403,7 +402,7 @@ class CmsCompoundObject extends CmsObject
     //
 
     /**
-     * Returns the Twig content string
+     * getTwigContent returns the Twig content string
      * @return string
      */
     public function getTwigContent()
@@ -412,7 +411,7 @@ class CmsCompoundObject extends CmsObject
     }
 
     /**
-     * Returns Twig node tree generated from the object's markup.
+     * getTwigNodeTree returns Twig node tree generated from the object's markup.
      * This method is used by the system internally and shouldn't
      * participate in the front-end request processing.
      * @link http://twig.sensiolabs.org/doc/internals.html Twig internals
@@ -440,7 +439,7 @@ class CmsCompoundObject extends CmsObject
     //
 
     /**
-     * Implements getter functionality for visible properties defined in
+     * __get functionality for visible properties defined in
      * the settings section or view bag array.
      */
     public function __get($name)
@@ -457,7 +456,7 @@ class CmsCompoundObject extends CmsObject
     }
 
     /**
-     * Dynamically set attributes on the model.
+     * __set dynamically sets attributes on the model.
      *
      * @param  string  $key
      * @param  mixed  $value
@@ -473,7 +472,7 @@ class CmsCompoundObject extends CmsObject
     }
 
     /**
-     * Determine if an attribute exists on the object.
+     * __isset determines if an attribute exists on the object.
      *
      * @param  string  $key
      * @return bool
@@ -492,7 +491,7 @@ class CmsCompoundObject extends CmsObject
     }
 
     /**
-     * Dynamically handle calls into the query instance.
+     * __call dynamically handles calls into the query instance.
      *
      * @param  string  $method
      * @param  array   $parameters

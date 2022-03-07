@@ -26,7 +26,7 @@ class ThemeLog extends Model
     protected $table = 'cms_theme_logs';
 
     /**
-     * @var array Relations
+     * @var array belongsTo relation
      */
     public $belongsTo = [
         'user' => \Backend\Models\User::class
@@ -38,7 +38,7 @@ class ThemeLog extends Model
     protected $themeCache;
 
     /**
-     * Adds observers to the model for logging purposes.
+     * bindEventsToModel adds observers to the model for logging purposes.
      */
     public static function bindEventsToModel(HalcyonModel $template)
     {
@@ -52,7 +52,7 @@ class ThemeLog extends Model
     }
 
     /**
-     * Creates a log record
+     * add a new log record
      * @return self
      */
     public static function add(HalcyonModel $template, $type = null)
@@ -76,9 +76,8 @@ class ThemeLog extends Model
         $newContent = $template->toCompiled();
         $oldContent = $template->getOriginal('content');
 
+        // Content not dirty
         if ($newContent === $oldContent && $templateName === $oldTemplateName && !$isDelete) {
-            traceLog($newContent, $oldContent);
-            traceLog('Content not dirty for: '. $template->getObjectTypeDirName().'/'.$template->fileName);
             return;
         }
 
@@ -103,6 +102,9 @@ class ThemeLog extends Model
         return $record;
     }
 
+    /**
+     * getThemeNameAttribute
+     */
     public function getThemeNameAttribute()
     {
         $code = $this->theme;
@@ -116,6 +118,9 @@ class ThemeLog extends Model
         return $theme->getConfigValue('name', $theme->getDirName());
     }
 
+    /**
+     * getTypeOptions
+     */
     public function getTypeOptions()
     {
         return [
@@ -125,11 +130,17 @@ class ThemeLog extends Model
         ];
     }
 
+    /**
+     * getAnyTemplateAttribute
+     */
     public function getAnyTemplateAttribute()
     {
         return $this->template ?: $this->old_template;
     }
 
+    /**
+     * getTypeNameAttribute
+     */
     public function getTypeNameAttribute()
     {
         return array_get($this->getTypeOptions(), $this->type);

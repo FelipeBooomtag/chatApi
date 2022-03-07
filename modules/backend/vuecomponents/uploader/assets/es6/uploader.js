@@ -1,4 +1,4 @@
-(function() {
+$.oc.module.register('backend.component.uploader', function () {
     const UploaderQueue = $.oc.module.import('backend.vuecomponents.uploader.queue');
     const UploaderFile = $.oc.module.import('backend.vuecomponents.uploader.file');
 
@@ -119,4 +119,4 @@
         },
         template: '#backend_vuecomponents_uploader'
     });
-})();
+});

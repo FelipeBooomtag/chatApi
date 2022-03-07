@@ -2,18 +2,18 @@
     <?php if ($useGroups): ?>
         <a
             href="javascript:;"
-            data-repeater-add-group
+            data-repeater-cmd="add-group"
             data-attach-loading>
-            <i class="icon-plus"></i>
+            <i class="octo-icon-add-bold"></i>
             <?= e(trans($prompt)) ?>
         </a>
     <?php else: ?>
         <a
             href="javascript:;"
-            data-repeater-add
+            data-repeater-cmd="add"
             data-request="<?= $this->getEventHandler('onAddItem') ?>"
             data-attach-loading>
-            <i class="icon-plus"></i>
+            <i class="octo-icon-add-bold"></i>
             <?= e(trans($prompt)) ?>
         </a>
     <?php endif ?>

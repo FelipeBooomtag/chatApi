@@ -105,9 +105,13 @@ class System
 
     /**
      * checkBaseDir checks if a file path is inside the base directory
+     * @deprecated
      */
     public function checkBaseDir($filePath): bool
     {
+        // return File::isLocalPath($filePath);
+
+        // @deprecated
         $restrictBaseDir = Config::get('system.restrict_base_dir', true);
 
         if ($restrictBaseDir && !File::isLocalPath($filePath)) {

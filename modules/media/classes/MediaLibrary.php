@@ -11,7 +11,7 @@ use ApplicationException;
 use SystemException;
 
 /**
- * Provides abstraction level for the Media Library operations.
+ * MediaLibrary provides abstraction level for the Media Library operations.
  * Implements the library caching features and security checks.
  *
  * @method static MediaLibrary instance()
@@ -30,44 +30,44 @@ class MediaLibrary
     const SORT_DIRECTION_DESC = 'desc';
 
     /**
-     * @var string Cache key
+     * @var string cacheKey
      */
     protected $cacheKey = 'media-library-contents';
 
     /**
-     * @var string Relative or absolute URL of the Library root folder.
+     * @var string storagePath relative or absolute URL of the Library root folder.
      */
     protected $storagePath;
 
     /**
-     * @var string The root Library folder path.
+     * @var string storageFolder at the root Library folder path.
      */
     protected $storageFolder;
 
     /**
-     * @var mixed A reference to the Media Library disk.
+     * @var mixed storageDisk is a reference to the Media Library disk.
      */
     protected $storageDisk;
 
     /**
-     * @var array Contains a list of files and directories to ignore.
+     * @var array ignoreNames contains a list of files and directories to ignore.
      * The list can be customized with system.storage.media.ignore configuration option.
      */
     protected $ignoreNames;
 
     /**
-     * @var array Contains a list of regex patterns to ignore in files and directories.
+     * @var array ignorePatterns contains a list of regex patterns to ignore in files and directories.
      * The list can be customized with system.storage.media.ignorePatterns configuration option.
      */
     protected $ignorePatterns;
 
     /**
-     * @var int Cache for the storage folder name length.
+     * @var int storageFolderNameLength cache for the storage folder name length.
      */
     protected $storageFolderNameLength;
 
     /**
-     * Initialize this singleton.
+     * init this singleton.
      */
     protected function init()
     {
@@ -81,9 +81,9 @@ class MediaLibrary
     }
 
     /**
-     * Set the cache key
+     * setCacheKey as the cache key for this instance
      *
-     * @param string $cacheKey The key to set as the cache key for this instance
+     * @param string $cacheKey
      */
     public function setCacheKey($cacheKey)
     {
@@ -91,9 +91,9 @@ class MediaLibrary
     }
 
     /**
-     * Get the cache key
+     * getCacheKey as the cache key for this instance
      *
-     * @return string The cache key to set as the cache key for this instance
+     * @return string
      */
     public function getCacheKey()
     {
@@ -101,7 +101,7 @@ class MediaLibrary
     }
 
     /**
-     * Returns a list of folders and files in a Library folder.
+     * listFolderContents returns a list of folders and files in a Library folder.
      *
      * @param string $folder Specifies the folder path relative the the Library root.
      * @param mixed $sortBy Determines the sorting preference.
@@ -164,7 +164,8 @@ class MediaLibrary
     }
 
     /**
-     * Finds files in the Library.
+     * findFiles in the Library.
+     *
      * @param string $searchTerm Specifies the search term.
      * @param mixed $sortBy Determines the sorting preference.
      * Supported values are 'title', 'size', 'lastModified' (see SORT_BY_XXX class constants), FALSE (to disable sorting), or an associative array with a 'by' key and a 'direction' key: ['by' => SORT_BY_XXX, 'direction' => SORT_DIRECTION_XXX].
@@ -204,7 +205,23 @@ class MediaLibrary
     }
 
     /**
-     * Deletes a file from the Library.
+     * findFile looks up a file and returns its MediaLibraryItem object
+     */
+    public function findFile($path): ?MediaLibraryItem
+    {
+        $path = self::validatePath($path);
+
+        $fullPath = $this->getMediaPath($path);
+
+        $item = $this->initLibraryItem($fullPath, MediaLibraryItem::TYPE_FILE);
+
+        $item->spawnPath = $path;
+
+        return $item;
+    }
+
+    /**
+     * deleteFiles from the Library.
      * @param array $paths A list of file paths relative to the Library root to delete.
      */
     public function deleteFiles($paths)
@@ -219,7 +236,7 @@ class MediaLibrary
     }
 
     /**
-     * Deletes a folder from the Library.
+     * deleteFolder from the Library.
      * @param string $path Specifies the folder path relative to the Library root.
      */
     public function deleteFolder($path)
@@ -231,7 +248,7 @@ class MediaLibrary
     }
 
     /**
-     * Determines if a file with the specified path exists in the library.
+     * exists determines if a file with the specified path exists in the library.
      * @param string $path Specifies the file path relative the the Library root.
      * @return boolean Returns TRUE if the file exists.
      */
@@ -244,7 +261,7 @@ class MediaLibrary
     }
 
     /**
-     * Determines if a folder with the specified path exists in the library.
+     * folderExists determines if a folder with the specified path exists in the library.
      * @param string $path Specifies the folder path relative the the Library root.
      * @return boolean Returns TRUE if the folder exists.
      */
@@ -267,7 +284,8 @@ class MediaLibrary
     }
 
     /**
-     * Returns a list of all directories in the Library, optionally excluding some of them.
+     * listAllDirectories returns a list of all directories in the Library, optionally
+     * excluding some of them.
      * @param array $exclude A list of folders to exclude from the result list.
      * The folder paths should be specified relative to the Library root.
      * @return array
@@ -308,7 +326,7 @@ class MediaLibrary
     }
 
     /**
-     * Returns a file contents.
+     * get returns a file contents.
      * @param string $path Specifies the file path relative the the Library root.
      * @return string Returns the file contents
      */
@@ -320,7 +338,7 @@ class MediaLibrary
     }
 
     /**
-     * Puts a file to the library.
+     * put a file to the library.
      * @param string $path Specifies the file path relative the the Library root.
      * @param string $contents Specifies the file contents.
      * @return boolean
@@ -333,7 +351,7 @@ class MediaLibrary
     }
 
     /**
-     * Moves a file to another location.
+     * moveFile to another location.
      * @param string $oldPath Specifies the original path of the file.
      * @param string $newPath Specifies the new path of the file.
      * @return boolean
@@ -350,7 +368,7 @@ class MediaLibrary
     }
 
     /**
-     * Copies a folder.
+     * copyFolder
      * @param string $originalPath Specifies the original path of the folder.
      * @param string $newPath Specifies the new path of the folder.
      * @return boolean
@@ -393,7 +411,7 @@ class MediaLibrary
     }
 
     /**
-     * Moves a folder.
+     * moveFolder
      * @param string $originalPath Specifies the original path of the folder.
      * @param string $newPath Specifies the new path of the folder.
      * @return boolean
@@ -434,7 +452,7 @@ class MediaLibrary
     }
 
     /**
-     * Creates a folder.
+     * makeFolder creates a folder.
      * @param string $path Specifies the folder path.
      * @return boolean
      */
@@ -447,7 +465,7 @@ class MediaLibrary
     }
 
     /**
-     * Resets the Library cache.
+     * resetCache for the Library cache.
      *
      * The cache stores the library table of contents locally in order to optimize
      * the performance when working with remote storages. The default cache TTL is
@@ -460,7 +478,7 @@ class MediaLibrary
     }
 
     /**
-     * Checks if file path doesn't contain any substrings that would pose a security threat.
+     * validatePath checks if file path doesn't contain any substrings that would pose a security threat.
      * Throws an exception if the path is not valid.
      * @param string $path Specifies the path.
      * @param boolean $normalizeOnly Specifies if only the normalization, without validation should be performed.
@@ -525,17 +543,26 @@ class MediaLibrary
     }
 
     /**
-     * Helper that makes a URL for a media file.
+     * url is a helper that makes a URL for a media file.
+     * Ideally the file should be passed as a string but it will try to deal with anything.
      * @param string $file
      * @return string
      */
     public static function url($file)
     {
+        if (is_array($file)) {
+            $file = array_shift($file);
+        }
+
+        if ($file instanceof \October\Rain\Database\Attach\File) {
+            return $file->getPath();
+        }
+
         return static::instance()->getPathUrl($file);
     }
 
     /**
-     * Returns a public file URL.
+     * getPathUrl returns a public file URL.
      * @param string $path Specifies the file path relative the the Library root.
      * @return string
      */
@@ -557,7 +584,7 @@ class MediaLibrary
     }
 
     /**
-     * Returns a file or folder path with the prefixed storage folder.
+     * getMediaPath returns a file or folder path with the prefixed storage folder.
      * @param string $path Specifies a path to process.
      * @return string Returns a processed string.
      */
@@ -567,7 +594,7 @@ class MediaLibrary
     }
 
     /**
-     * Returns path relative to the Library root folder.
+     * getMediaRelativePath returns path relative to the Library root folder.
      * @param string $path Specifies a path relative to the Library disk root.
      * @return string Returns the updated path.
      */
@@ -583,7 +610,7 @@ class MediaLibrary
     }
 
     /**
-     * Determines if the path should be visible (not ignored).
+     * isVisible determines if the path should be visible (not ignored).
      * @param string $path Specifies a path to check.
      * @return boolean Returns TRUE if the path is visible.
      */
@@ -610,12 +637,12 @@ class MediaLibrary
      * @param string $itemType Specifies the item type.
      * @return mixed Returns the MediaLibraryItem object or NULL if the item is not visible.
      */
-    protected function initLibraryItem($path, $itemType)
+    protected function initLibraryItem($path, $itemType): ?MediaLibraryItem
     {
         $relativePath = $this->getMediaRelativePath($path);
 
         if (!$this->isVisible($relativePath)) {
-            return;
+            return null;
         }
 
         /*

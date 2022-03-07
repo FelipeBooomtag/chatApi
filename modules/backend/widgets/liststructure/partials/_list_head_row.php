@@ -7,13 +7,40 @@
             </div>
         </th>
     <?php endif ?>
+    <?php if ($showReorder): ?>
+        <th class="list-reorder"></th>
+    <?php endif ?>
+    <?php $index = 0; foreach ($columns as $key => $column): ?>
+        <?php
+            $index++;
+            $styles = [];
+            if ($column->width) {
+                $styles[] = 'width: '.$column->width;
+            }
 
-    <?php foreach ($columns as $key => $column): ?>
+            $classes = [
+                'list-cell-name-'.$column->getName(),
+                'list-cell-type-'.$column->type,
+                $column->getAlignClass(),
+                $column->headCssClass
+            ];
+
+            if ($index === 1) {
+                $styles[] = 'padding-left: '.$this->getIndentStartSize(0).'px';
+                $classes[] = 'explicit-left-padding';
+            }
+
+        ?>
         <?php if ($showSorting && $column->sortable): ?>
-            <th
-                <?php if ($column->width): ?>style="width: <?= $column->width ?>"<?php endif ?>
-                class="<?= $this->sortColumn==$column->columnName?'sort-'.$this->sortDirection.' active':'sort-desc' ?> list-cell-name-<?= $column->getName() ?> list-cell-type-<?= $column->type ?> <?= $column->getAlignClass() ?> <?= $column->headCssClass ?>"
-                >
+            <?php
+                if ($this->sortColumn == $column->columnName) {
+                    $classes[] = 'sort-'.$this->sortDirection.' active';
+                }
+                else {
+                    $classes[] = 'sort-desc';
+                }
+            ?>
+            <th style="<?= implode(';', $styles) ?>" class="<?= implode(' ', $classes) ?>">
                 <a
                     href="javascript:;"
                     data-request="<?= $this->getEventHandler('onSort') ?>"
@@ -23,10 +50,7 @@
                 </a>
             </th>
         <?php else: ?>
-            <th
-                <?php if ($column->width): ?>style="width: <?= $column->width ?>"<?php endif ?>
-                class="list-cell-name-<?= $column->getName() ?> list-cell-type-<?= $column->type ?> <?= $column->getAlignClass() ?> <?= $column->headCssClass ?>"
-                >
+            <th style="<?= implode(';', $styles) ?>" class="<?= implode(' ', $classes) ?>">
                 <span><?= $this->getHeaderValue($column) ?></span>
             </th>
         <?php endif ?>

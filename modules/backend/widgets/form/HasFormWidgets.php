@@ -71,7 +71,9 @@ trait HasFormWidgets
                 if ($fieldOptions === true) {
                     $fieldOptions = null;
                 }
-                $fieldOptions = $field->getOptionsFromModel($this->model, $fieldOptions, $this->data);
+                if (!is_array($fieldOptions)) {
+                    $fieldOptions = $field->getOptionsFromModel($this->model, $fieldOptions, $this->data);
+                }
                 return $fieldOptions;
             });
         }

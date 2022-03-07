@@ -119,8 +119,8 @@ abstract class FormWidgetBase extends WidgetBase
     }
 
     /**
-     * Process the postback value for this widget. If the value is omitted from
-     * postback data, it will be NULL, otherwise it will be an empty string.
+     * getSaveValue processes the postback value for this widget. If the value is omitted from
+     * postback data, the form widget will be skipped.
      * @param mixed $value The existing value for this widget.
      * @return string The new value for this widget.
      */
@@ -130,7 +130,7 @@ abstract class FormWidgetBase extends WidgetBase
     }
 
     /**
-     * Returns the value for this form field,
+     * getLoadValue returns the value for this form field,
      * supports nesting via HTML array.
      * @return string
      */

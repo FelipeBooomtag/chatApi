@@ -1,4 +1,4 @@
-(function() {
+$.oc.module.register('backend.component.monacoeditor', function () {
     let environmentInitialized = false;
     let emmetInitialized = false;
 
@@ -356,4 +356,4 @@
         },
         template: '#backend_vuecomponents_monacoeditor'
     });
-})();
+});

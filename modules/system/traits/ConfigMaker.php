@@ -150,6 +150,7 @@ trait ConfigMaker
         $fileName = File::symbolizePath($fileName);
 
         if (File::isLocalPath($fileName) ||
+            // @deprecated
             (!Config::get('system.restrict_base_dir', true) && realpath($fileName) !== false)
         ) {
             return $fileName;

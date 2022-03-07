@@ -96,12 +96,22 @@
                         font-size: 14px;
                         margin-right: 4px;
                         margin-left: -2px;
+
+                        &[class^="octo-icon-"] {
+                            font-size: 16px;
+                            position: relative;
+                            top: 2px;
+                            left: -2px;
+                        }
                     }
                 }
 
                 &.first-item:not(.disabled) {
                     a, button {
                         &:hover, &:focus, &:active {
+                            border-top-left-radius: 4px;
+                            border-top-right-radius: 4px;
+
                             &:after {
                                 .triangle(up, 15px, 8px, @color-dropdown-hover-bg);
                                 position: absolute;
@@ -114,6 +124,15 @@
                             &:after {
                                 .triangle(up, 15px, 8px, @color-dropdown-active-bg);
                             }
+                        }
+                    }
+                }
+
+                &.last-item:not(.disabled) {
+                    a, button {
+                        &:hover, &:focus, &:active {
+                            border-bottom-left-radius: 4px;
+                            border-bottom-right-radius: 4px;
                         }
                     }
                 }

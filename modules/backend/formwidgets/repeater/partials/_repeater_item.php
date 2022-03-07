@@ -33,7 +33,7 @@
             </div>
             <div class="repeater-item-dropdown dropdown">
                 <a href="javascript:;" class="repeater-item-menu" data-toggle="dropdown">
-                    <i class="icon-cog"></i>
+                    <i class="octo-icon-cog"></i>
                 </a>
                 <ul
                     class="dropdown-menu dropdown-menu-right"
@@ -44,7 +44,7 @@
             <?php if ($showReorder): ?>
                 <div class="repeater-item-reorder">
                     <a href="javascript:;" class="repeater-item-handle <?= $this->getId('items') ?>-handle">
-                        ☰
+                        <i class="octo-icon-list-reorder"></i>
                     </a>
                 </div>
             <?php endif ?>
@@ -56,6 +56,7 @@
         data-refresh-data="'_repeater_index': '<?= $indexValue ?>', '_repeater_group': '<?= $groupCode ?>'"
     >
         <?= $widget->renderFields($widget->getFields()) ?>
+        <input type="hidden" name="<?= $widget->arrayName ?>[_index]" value="<?= $indexValue ?>" />
         <?php if ($useGroups): ?>
             <input type="hidden" name="<?= $widget->arrayName ?>[<?= $groupKeyFrom ?>]" value="<?= $groupCode ?>" />
         <?php endif ?>

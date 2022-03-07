@@ -1,5 +1,7 @@
 <?php namespace Backend\FormWidgets\Repeater;
 
+use October\Rain\Database\Model;
+
 /**
  * HasRelationStore contains logic for related repeater items
  */
@@ -12,7 +14,7 @@ trait HasRelationStore
     {
         [$model, $attribute] = $this->resolveModelAttribute($this->valueFrom);
 
-        if ($model && $model->hasRelation($attribute)) {
+        if ($model instanceof Model && $model->hasRelation($attribute)) {
             $this->useRelation = true;
         }
     }
@@ -35,20 +37,22 @@ trait HasRelationStore
         }
 
         if ($this->isLoaded) {
-            $value = post($this->formField->getName());
-            $ids = is_array($value)
-                ? array_map(function($v) { return $v['_id'] ?? null; }, $value)
-                : [];
+            $value = $this->getLoadedValueFromPost();
+            $ids = is_array($value) ? array_map(function($v) { return $v['_id'] ?? null; }, $value) : [];
             $records = $this->getRelationQuery()->find($ids);
+
+            if ($records) {
+                $indexes = array_flip($ids);
+                foreach ($records as $model) {
+                    $rIndex = $indexes[$model->getKey()] ?? null;
+                    if ($rIndex !== null) {
+                        $this->relatedRecords[$rIndex] = $model;
+                    }
+                }
+            }
         }
         else {
-            $records = $this->getRelationObject()->get();
-        }
-
-        if ($records) {
-            foreach ($records as $rIndex => $model) {
-                $this->relatedRecords[$rIndex] = $model;
-            }
+            $this->relatedRecords = $this->getRelationObject()->get()->all();
         }
 
         return $this->relatedRecords;

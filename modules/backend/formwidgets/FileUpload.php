@@ -6,6 +6,7 @@ use Validator;
 use Backend\Widgets\Form;
 use Backend\Classes\FormField;
 use Backend\Classes\FormWidgetBase;
+use System\Models\File as FileModel;
 use October\Rain\Filesystem\Definitions as FileDefinitions;
 use ApplicationException;
 use ValidationException;
@@ -15,9 +16,10 @@ use Exception;
  * FileUpload renders a form file uploader field.
  *
  * Supported options:
- * - mode: image-single, image-multi, file-single, file-multi
- * - upload-label: Add file
- * - empty-label: No file uploaded
+ *
+  *    file:
+ *        label: Some file
+ *        type: fileupload
  *
  * @package october\backend
  * @author Alexey Bobkov, Samuel Georges
@@ -60,6 +62,22 @@ class FileUpload extends FormWidgetBase
      * @var mixed maxFiles allowed
      */
     public $maxFiles;
+
+    /**
+     * @var string Defines a mount point for the editor toolbar.
+     * Must include a module name that exports the Vue application and a state element name.
+     * Format: module.name::stateElementName
+     * Only works in Vue applications and form document layouts.
+     */
+    public $externalToolbarAppState = null;
+
+    /**
+     * @var string Defines an event bus for an external toolbar.
+     * Must include a module name that exports the Vue application and a state element name.
+     * Format: module.name::eventBus
+     * Only works in Vue applications and form document layouts.
+     */
+    public $externalToolbarEventBus = null;
 
     /**
      * @var array thumbOptions used for generating thumbnails
@@ -113,6 +131,8 @@ class FileUpload extends FormWidgetBase
             'thumbOptions',
             'useCaption',
             'attachOnUpload',
+            'externalToolbarAppState',
+            'externalToolbarEventBus'
         ]);
 
         if ($this->formField->disabled) {
@@ -161,6 +181,8 @@ class FileUpload extends FormWidgetBase
         $this->vars['maxFiles'] = $this->maxFiles;
         $this->vars['cssDimensions'] = $this->getCssDimensions();
         $this->vars['useCaption'] = $this->useCaption;
+        $this->vars['externalToolbarAppState'] = $this->externalToolbarAppState;
+        $this->vars['externalToolbarEventBus'] = $this->externalToolbarEventBus;
     }
 
     /**
@@ -404,7 +426,7 @@ class FileUpload extends FormWidgetBase
             $fileModel = $this->getRelationModel();
             $uploadedFile = Input::file('file_data');
 
-            $validationRules = ['max:'.$fileModel::getMaxFilesize()];
+            $validationRules = ['max:'.($this->maxFilesize * 1024)];
             if ($fileTypes = $this->getAcceptedFileTypes()) {
                 $validationRules[] = 'extensions:'.$fileTypes;
             }
@@ -488,39 +510,6 @@ class FileUpload extends FormWidgetBase
      */
     protected function getUploadMaxFilesize(): float
     {
-        $maxSizeBytes = min(
-            $this->convertPhpSizeToBytes(ini_get('post_max_size')),
-            $this->convertPhpSizeToBytes(ini_get('upload_max_filesize'))
-        );
-
-        return round($maxSizeBytes / 1024 / 1024, 4);
-    }
-
-    /**
-     * convertPhpSizeToBytes converts a PHP size shorthand notation to bytes
-     */
-    protected function convertPhpSizeToBytes($size): float
-    {
-        $suffix = strtoupper(substr($size, -1));
-        if (!in_array($suffix, ['P', 'T', 'G', 'M', 'K'])){
-            return (float) $size;
-        }
-
-        $value = substr($size, 0, -1);
-        switch ($suffix) {
-            case 'P':
-                $value *= 1024;
-            case 'T':
-                $value *= 1024;
-            case 'G':
-                $value *= 1024;
-            case 'M':
-                $value *= 1024;
-            case 'K':
-                $value *= 1024;
-                break;
-        }
-
-        return (float) $value;
+        return FileModel::getMaxFilesize() / 1024;
     }
 }

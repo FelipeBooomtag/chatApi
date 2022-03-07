@@ -1,4 +1,4 @@
-(function () {
+$.oc.module.register('backend.component.richeditor', function () {
     function initFroala(component) {
         var options = JSON.parse(component.$el.getAttribute('data-configuration'));
         var $textarea = $(component.$refs.textarea);
@@ -236,4 +236,4 @@
         },
         template: '#backend_vuecomponents_richeditor'
     });
-})();
+});

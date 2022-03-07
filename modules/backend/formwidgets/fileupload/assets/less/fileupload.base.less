@@ -33,8 +33,33 @@
     &.size-giant {
         .fileupload-set-height(@size-giant);
     }
-    &.size-adaptive {
+    &.size-auto {
         overflow: auto;
+    }
+    &.size-adaptive {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        background: white;
+
+        .uploader-control-container {
+            border: none!important;
+            padding: 14px;
+        }
+
+        .empty-state {
+            display: block;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        &.is-populated {
+            .empty-state {
+                display: none;
+            }
+        }
     }
 }
 
@@ -69,7 +94,7 @@
 
         h4.filename {
             font-weight: 500;
-            margin-top: 0;
+            margin-top: -2px;
         }
 
         &.upload-object-image {
@@ -107,12 +132,19 @@
 
         a.drag-handle {
             position: absolute;
+            display: none;
             color: @color-grey-2;
-            display: block;
-            left: 5px;
+            cursor: move;
+            left: -1px;
             top: 23px;
-            font-size: 13px;
+            font-size: 24px;
             text-decoration: none;
+        }
+
+        &:hover {
+            a.drag-handle {
+                display: block;
+            }
         }
 
         .custom-checkbox-v2 {
@@ -128,6 +160,10 @@
                 display: none;
             }
         }
+    }
+
+    .empty-state {
+        display: none;
     }
 
     //
@@ -210,7 +246,7 @@
         }
 
         .drag-handle {
-            display: none;
+            display: none !important;
         }
     }
 

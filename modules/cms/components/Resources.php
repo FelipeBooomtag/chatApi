@@ -76,6 +76,12 @@ class Resources extends ComponentBase
                 'description' => 'Page variables name(s) and value(s)',
                 'type' => 'dictionary',
                 'showExternalParam' => false
+            ],
+            'headers' => [
+                'title' => 'Headers',
+                'description' => 'Page header name(s) and value(s)',
+                'type' => 'dictionary',
+                'showExternalParam' => false
             ]
         ];
     }
@@ -99,36 +105,42 @@ class Resources extends ComponentBase
         // JavaScript
         if ($assets = $this->property('js')) {
             foreach ((array) $assets as $asset) {
-                $this->addJsBundle($this->prefixJs($asset), 'cms-js');
+                $this->controller->addJsBundle($this->prefixJs($asset), 'cms-js');
             }
         }
 
         // LESS
         if ($assets = $this->property('less')) {
             foreach ((array) $assets as $asset) {
-                $this->addCssBundle($this->prefixLess($asset), 'cms-less');
+                $this->controller->addCssBundle($this->prefixLess($asset), 'cms-less');
             }
         }
 
         // SASS
         if ($assets = $this->property('sass')) {
             foreach ((array) $assets as $asset) {
-                $this->addCssBundle($this->prefixSass($asset), 'cms-sass');
+                $this->controller->addCssBundle($this->prefixSass($asset), 'cms-sass');
             }
         }
 
         // CSS
         if ($assets = $this->property('css')) {
             foreach ((array) $assets as $asset) {
-                $this->addCssBundle($this->prefixCss($asset), 'cms-css');
+                $this->controller->addCssBundle($this->prefixCss($asset), 'cms-css');
             }
         }
 
-        // Variables
+        // Variables and Headers
         $this->controller->bindEvent('page.beforeRenderPage', function ($page) {
             if ($vars = $this->property('vars')) {
                 foreach ((array) $vars as $key => $value) {
                     $this->page[$key] = $value;
+                }
+            }
+
+            if ($headers = $this->property('headers')) {
+                foreach ((array) $headers as $key => $value) {
+                    $this->controller->setResponseHeader($key, $value);
                 }
             }
         });

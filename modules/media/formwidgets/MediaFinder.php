@@ -2,8 +2,10 @@
 
 use BackendAuth;
 use Media\Classes\MediaLibrary;
-use Backend\Classes\FormField;
 use Backend\Classes\FormWidgetBase;
+use October\Rain\Support\Collection;
+use October\Rain\Database\Model;
+use Exception;
 
 /**
  * Media Finder
@@ -37,6 +39,27 @@ class MediaFinder extends FormWidgetBase
      */
     public $imageHeight = 190;
 
+    /**
+     * @var int|null maxItems allowed
+     */
+    public $maxItems = null;
+
+    /**
+     * @var string Defines a mount point for the editor toolbar.
+     * Must include a module name that exports the Vue application and a state element name.
+     * Format: module.name::stateElementName
+     * Only works in Vue applications and form document layouts.
+     */
+    public $externalToolbarAppState = null;
+
+    /**
+     * @var string Defines an event bus for an external toolbar.
+     * Must include a module name that exports the Vue application and a state element name.
+     * Format: module.name::eventBus
+     * Only works in Vue applications and form document layouts.
+     */
+    public $externalToolbarEventBus = null;
+
     //
     // Object properties
     //
@@ -52,7 +75,12 @@ class MediaFinder extends FormWidgetBase
     public function init()
     {
         $this->fillFromConfig([
-            'mode'
+            'mode',
+            'imageWidth',
+            'imageHeight',
+            'maxItems',
+            'externalToolbarAppState',
+            'externalToolbarEventBus'
         ]);
 
         if ($this->formField->disabled || $this->formField->readOnly) {
@@ -61,6 +89,15 @@ class MediaFinder extends FormWidgetBase
 
         if ((!$user = BackendAuth::getUser()) || !$user->hasAccess('media.manage_media')) {
             $this->previewMode = true;
+        }
+
+        if ($this->maxItems === null) {
+            if ($this->model instanceof Model) {
+                $this->maxItems = $this->model->isJsonable($this->valueFrom) ? 0 : 1;
+            }
+            else {
+                $this->maxItems = 1;
+            }
         }
     }
 
@@ -79,16 +116,71 @@ class MediaFinder extends FormWidgetBase
      */
     public function prepareVars()
     {
-        $value = $this->getLoadValue();
-        $isImage = $this->mode === 'image';
-
-        $this->vars['value'] = $value;
-        $this->vars['imageUrl'] = $isImage && $value ? MediaLibrary::url($value) : '';
-        $this->vars['imageExists'] = $isImage && $value ? MediaLibrary::instance()->exists($value) : '';
+        $this->vars['size'] = $this->formField->size;
+        $this->vars['fileList'] = $fileList = $this->getFileList();
+        $this->vars['singleFile'] = $fileList->first();
+        $this->vars['displayMode'] = $this->getDisplayMode();
         $this->vars['field'] = $this->formField;
-        $this->vars['mode'] = $this->mode;
+        $this->vars['maxItems'] = $this->maxItems;
         $this->vars['imageWidth'] = $this->imageWidth;
         $this->vars['imageHeight'] = $this->imageHeight;
+        $this->vars['externalToolbarAppState'] = $this->externalToolbarAppState;
+        $this->vars['externalToolbarEventBus'] = $this->externalToolbarEventBus;
+    }
+
+    /**
+     * getFileList returns a list of associated files
+     */
+    protected function getFileList()
+    {
+        $value = $this->getLoadValue() ?: [];
+
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
+        // Lookup files
+        $mediaLib = MediaLibrary::instance();
+
+        $list = [];
+        foreach ($value as $val) {
+            try {
+                if ($file = $mediaLib->findFile($val)) {
+                    $list[] = $file;
+                }
+            }
+            catch (Exception $ex) {}
+        }
+
+        // Promote to Collection
+        $list = new Collection($list);
+
+        return $list;
+    }
+
+    /**
+     * getSaveValue
+     */
+    public function getSaveValue($value)
+    {
+        return $this->maxItems === 1 ? $value : json_decode($value, true);
+    }
+
+    /**
+     * getDisplayMode for the file upload. Eg: file-multi, image-single, etc
+     * @return string
+     */
+    protected function getDisplayMode()
+    {
+        $mode = $this->getConfig('mode', 'file');
+
+        if (str_contains($mode, '-')) {
+            return $mode;
+        }
+
+        $mode .= $this->maxItems === 1 ? '-single' : '-multi';
+
+        return $mode;
     }
 
     /**

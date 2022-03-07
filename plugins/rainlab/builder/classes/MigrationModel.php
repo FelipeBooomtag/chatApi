@@ -315,7 +315,7 @@ class MigrationModel extends BaseModel
             ]);
         }
 
-        $this->scriptFileName = Str::snake($migrationInfo['class']);
+        $this->scriptFileName = $this->makeScriptFileName($migrationInfo['class']);
 
         /*
          * Validate that a file with the generated name does not exist yet.
@@ -497,5 +497,24 @@ class MigrationModel extends BaseModel
     {
         $versionObj = new PluginVersion;
         return $versionObj->getPluginVersionInformation($this->getPluginCodeObj());
+    }
+
+    /**
+     * makeScriptFileName will ensure the last digit in the script contains an underscore,
+     * for consistency with other areas.
+     *
+     * eg: Some123Script3 → Some123Script_3
+     */
+    protected function makeScriptFileName($value): string
+    {
+        $value = Str::snake($value);
+
+        $value = preg_replace_callback('/[0-9]+$/u', function ($match) {
+            $numericSuffix = $match[0];
+
+            return '_' . $numericSuffix;
+        }, $value);
+
+        return $value;
     }
 }

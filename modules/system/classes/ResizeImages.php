@@ -52,7 +52,7 @@ class ResizeImages
     public function getContents($cacheKey)
     {
         $cacheInfo = $this->getCache($cacheKey);
-        if (!$cacheInfo) {
+        if (!$cacheInfo || !isset($cacheInfo['path'])) {
             throw new ApplicationException(Lang::get('system::lang.resizer.not_found', ['name'=>$cacheKey]));
         }
 
@@ -166,7 +166,6 @@ class ResizeImages
     protected function processImage($image)
     {
         $result = [
-            'disk' => null,
             'path' => null,
             'extension' => null,
             'source' => null
@@ -178,7 +177,6 @@ class ResizeImages
             $path = $image->getDiskPath();
 
             if (File::extension($path) && $disk->exists($path)) {
-                $result['disk'] = $image->getDisk();
                 $result['path'] = $image->getLocalPath();
                 $result['extension'] = $image->getExtension();
                 $result['source'] = 'model';
@@ -440,7 +438,7 @@ class ResizeImages
      */
     protected function getCacheKey(array $payload): string
     {
-        $cacheKey = print_r($payload, true);
+        $cacheKey = json_encode($payload);
 
         /**
          * @event cms.resizer.getCacheKey

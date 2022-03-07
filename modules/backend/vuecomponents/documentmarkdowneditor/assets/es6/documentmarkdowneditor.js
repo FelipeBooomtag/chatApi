@@ -1,4 +1,4 @@
-(function() {
+$.oc.module.register('backend.component.documentmarkdowneditor', function () {
     const utils = $.oc.module.import('backend.vuecomponents.documentmarkdowneditor.utils');
     const octoberCommands = $.oc.module.import('backend.vuecomponents.documentmarkdowneditor.octobercommands');
 
@@ -392,4 +392,4 @@
         },
         template: '#backend_vuecomponents_documentmarkdowneditor'
     });
-})();
+});

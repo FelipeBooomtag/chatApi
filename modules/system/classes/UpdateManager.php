@@ -9,6 +9,7 @@ use Cache;
 use Event;
 use Schema;
 use Config;
+use Request;
 use System as SystemHelper;
 use Carbon\Carbon;
 use Cms\Classes\ThemeManager;
@@ -501,7 +502,8 @@ class UpdateManager
     {
         $version = SystemHelper::VERSION;
 
-        if ($build = $this->getCurrentBuildNumber()) {
+        $build = $this->getCurrentBuildNumber();
+        if ($build !== null) {
             $version .= '.' . $build;
         }
 
@@ -908,11 +910,12 @@ class UpdateManager
     protected function applyHttpAttributes($http, $postData)
     {
         $postData['protocol_version'] = '2.0';
-        $postData['client'] = 'october';
+        $postData['client'] = 'October CMS';
 
         $postData['server'] = base64_encode(json_encode([
-            'php'   => PHP_VERSION,
-            'url'   => Url::to('/'),
+            'php' => PHP_VERSION,
+            'url' => Url::to('/'),
+            'ip' => Request::ip(),
             'since' => PluginVersion::orderBy('created_at')->value('created_at')
         ]));
 

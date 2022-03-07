@@ -24,7 +24,7 @@
         useReorder: true,
         useTree: true,
         includeSortOrders: false,
-        indentSize: 24,
+        indentSize: 18,
         maxDepth: null
     }
 
@@ -73,10 +73,22 @@
         this.activeChildren = null;
         this.lastChildDiff = null;
 
+        var that = this;
+
         this.sortable = Sortable.create(this.$tableBody.get(0), {
             // forceFallback: true,
             animation: 150,
-            handle: 'a.tree-reorder-handle',
+            // handle: 'a.list-reorder-handle',
+
+            setData: function setData(dataTransfer, dragEl) {
+                var hoverElement = $(document.documentElement).hasClass('gecko') ? 'div' : 'canvas';
+                that.blankHoverImage = document.createElement(hoverElement);
+
+                document.body.appendChild(that.blankHoverImage);
+                dataTransfer.setDragImage(that.blankHoverImage, 0, 0);
+                dataTransfer.setData('Text', dragEl.textContent);
+            },
+
             onStart: $.proxy(this.onDragStart, this),
             onChange: $.proxy(this.onChange, this),
             onEnd: $.proxy(this.onDragStop, this),
@@ -139,6 +151,7 @@
         this.activeAncestors = this.getAncestors($item);
         this.activeChildren = this.getChildren($item);
         this.dragStartX = evt.originalEvent.pageX;
+        this.$tableBody.addClass('tree-drag-mode');
 
         var currentDepth = $item.data('tree-level'),
             lastChildDiff = 0;
@@ -167,7 +180,15 @@
         this.activeItem = null;
         this.dragging = false;
         var $item = $(evt.item),
-            self = this;
+            self = this,
+            $tableBody = this.$tableBody;
+
+        $tableBody.addClass('tree-drag-updated').removeClass('tree-drag-mode');
+
+        if (this.blankHoverImage) {
+            $(this.blankHoverImage).remove();
+            this.blankHoverImage = null;
+        }
 
         var currentLevel = $item.data('tree-level'),
             proposedLevel = $item.data('tree-level-proposed'),
@@ -193,6 +214,8 @@
 
         this.$el.request(this.options.reorderHandler, {
             data: postData
+        }).always(function () {
+            $tableBody.removeClass('tree-drag-updated');
         });
     }
 
@@ -418,8 +441,9 @@
     }
 
     ListStructureWidget.prototype.getIndentStartSize = function(treeLevel) {
-        var indentLevel = treeLevel + (this.options.useReorder && this.options.useTree ? 2 : 1);
-        return (indentLevel * this.options.indentSize) + (this.options.useReorder ? 20 : 15);
+        return (treeLevel * this.options.indentSize) +
+            (this.options.useTree ? 15 : 0) +
+            (this.options.useReorder ? 0 : 15);
     }
 
     // LISTREE WIDGET PLUGIN DEFINITION

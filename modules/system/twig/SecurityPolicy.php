@@ -7,7 +7,7 @@ use Twig\Sandbox\SecurityNotAllowedMethodError;
 use Twig\Sandbox\SecurityNotAllowedPropertyError;
 
 /**
- * SecurityPolicy globally blocks accessibility of certain methods and properties
+ * SecurityPolicy is a more strict policy using a whitelist
  *
  * @package october\system
  * @author Alexey Bobkov, Samuel Georges
@@ -15,48 +15,32 @@ use Twig\Sandbox\SecurityNotAllowedPropertyError;
 final class SecurityPolicy implements SecurityPolicyInterface
 {
     /**
-     * @var array blockedClassMethods is a list of forbidden classes and methods
+     * @var array blockMethods is a list of forbidden methods
      */
-    protected $blockedClassMethods = [
-        \October\Rain\Database\Attach\File::class => ['fromPost', 'fromData', 'fromUrl', 'getDisk'],
-    ];
-
-    /**
-     * @var array blockedClasses is a list of forbidden classes
-     */
-    protected $blockedClasses = [
-        \Twig\Environment::class,
-        \Illuminate\Filesystem\Filesystem::class,
-        \Illuminate\Session\FileSessionHandler::class,
-        \Illuminate\Contracts\Filesystem\Filesystem::class
-    ];
-
-    /**
-     * @var array blockedProperties is a list of forbidden properties
-     */
-    protected $blockedProperties = [];
-
-    /**
-     * @var array blockedMethods is a list of forbidden methods
-     */
-    protected $blockedMethods = [
-        // Prevent magic bypass
+    protected $blockMethods = [
+        // Block PHP
         '__call',
+        '__callStatic',
 
-        // Prevent dynamic methods and props
+        // Block October\Rain\Extension\ExtensionTrait
+        'extend',
+        'extensionExtendCallback',
+
+        // Block October\Rain\Extension\ExtendableTrait
+        'extendableCall',
+        'extendableCallStatic',
+        'extendClassWith',
+        'implementClassWith',
         'addDynamicMethod',
         'addDynamicProperty',
 
-        // Prevent binding event logic
+        // Block October\Rain\Support\Traits\Emitter
         'bindEvent',
         'bindEventOnce',
 
-        // General write bans
-        'create',
-        'insert',
-        'update',
-        'delete',
-        'write',
+        // Block Illuminate\Support\Traits\Macroable
+        'macro',
+        'mixin',
     ];
 
     /**
@@ -64,22 +48,9 @@ final class SecurityPolicy implements SecurityPolicyInterface
      */
     public function __construct()
     {
-        $this->setBlockedMethods();
-    }
-
-    /**
-     * setBlockedMethods sets the defined blocked methods as lower case
-     */
-    public function setBlockedMethods(): void
-    {
-        foreach ($this->blockedMethods as $i => $m) {
-            $this->blockedMethods[$i] = strtr($m, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
-        }
-
-        foreach ($this->blockedClassMethods as $i => $methods) {
-            foreach ($methods as $ii => $m) {
-                $this->blockedClassMethods[$i][$ii] = strtr($m, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
-            }
+        // Convert all methods to lower case
+        foreach ($this->blockMethods as $i => $m) {
+            $this->blockMethods[$i] = strtr($m, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
         }
     }
 
@@ -87,7 +58,7 @@ final class SecurityPolicy implements SecurityPolicyInterface
      * checkSecurity
      * @throws SecurityError
      */
-    public function checkSecurity($tags, $filters, $functions): void
+    public function checkSecurity($tags, $filters, $functions)
     {
     }
 
@@ -95,44 +66,79 @@ final class SecurityPolicy implements SecurityPolicyInterface
      * checkMethodAllowed
      * @throws SecurityNotAllowedMethodError
      */
-    public function checkMethodAllowed($obj, $method): void
+    public function checkMethodAllowed($obj, $method)
     {
         if ($obj instanceof Template || $obj instanceof Markup) {
             return;
         }
 
-        $blockedMethod = strtr($method, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
+        $this->checkMethodAllowedWhitelist($obj, $method);
+        $this->checkMethodAllowedBlacklist($obj, $method);
 
-        // Check objects
-        foreach ($this->blockedClassMethods as $blockedClass => $blockedMethods) {
-            if (is_a($obj, $blockedClass) && in_array($blockedMethod, $blockedMethods)) {
-                throw new SecurityNotAllowedMethodError(sprintf('Calling "%s" method on a "%s" object is blocked.', $method, $blockedClass), $blockedClass, $method);
-            }
-        }
-
-        // Check general classes
-        foreach ($this->blockedClasses as $blockedClass) {
-            if (is_a($obj, $blockedClass)) {
-                throw new SecurityNotAllowedMethodError(sprintf('Calling any method on a "%s" object is blocked.', $blockedClass), $blockedClass, $method);
-            }
-        }
-
-        // Check general methods
-        if (in_array($blockedMethod, $this->blockedMethods)) {
-            $class = get_class($obj);
-            throw new SecurityNotAllowedMethodError(sprintf('Calling "%s" method on a "%s" object is blocked.', $method, $class), $class, $method);
-        }
     }
 
     /**
      * checkPropertyAllowed
      * @throws SecurityNotAllowedPropertyError
      */
-    public function checkPropertyAllowed($obj, $property): void
+    public function checkPropertyAllowed($obj, $property)
     {
-        if (in_array($property, $this->blockedProperties)) {
-            $class = get_class($obj);
-            throw new SecurityNotAllowedPropertyError(sprintf('Calling "%s" property on a "%s" object is blocked.', $property, $class), $class, $property);
+    }
+
+    //
+    // Whitelist
+    //
+
+    /**
+     * checkMethodAllowedWhitelist
+     */
+    protected function checkMethodAllowedWhitelist($obj, $method)
+    {
+        // Common internals
+        if (
+            $obj instanceof \Carbon\Carbon ||
+            $obj instanceof \Illuminate\View\View ||
+            $obj instanceof \Illuminate\Support\Collection ||
+            $obj instanceof \Illuminate\Database\Query\Builder ||
+            $obj instanceof \Illuminate\Database\Eloquent\Builder ||
+            $obj instanceof \Illuminate\Pagination\AbstractPaginator
+        ) {
+            return;
         }
+
+        // Contractual whitelist
+        if ($obj instanceof \October\Contracts\Twig\CallsMethods) {
+            $methodNames = $obj->getTwigMethodNames();
+            if (in_array($method, $methodNames)) {
+                return;
+            }
+        }
+
+        // Contractual wildcard
+        if ($obj instanceof \October\Contracts\Twig\CallsAnyMethod) {
+            return;
+        }
+
+        $className = get_class($obj);
+        throw new SecurityNotAllowedMethodError(sprintf('Calling any method on a "%s" object is blocked.', $className), $className, $method);
+    }
+
+    //
+    // Blacklist
+    //
+
+    /**
+     * checkMethodAllowedBlacklist
+     */
+    protected function checkMethodAllowedBlacklist($obj, $method)
+    {
+        $blockedMethod = strtr($method, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
+
+        if (!in_array($blockedMethod, $this->blockMethods)) {
+            return;
+        }
+
+        $className = get_class($obj);
+        throw new SecurityNotAllowedMethodError(sprintf('Calling "%s" method on a "%s" object is blocked.', $method, $className), $className, $method);
     }
 }

@@ -1,13 +1,5 @@
-<div class="nolink">
-    <?php if ($showReorder): ?>
-        <a
-            href="javascript:;"
-            class="tree-reorder-handle nolink"
-            title="<?= e(trans('backend::lang.treeview.reorder')) ?>">
-            <span>☰</span>
-        </a>
-    <?php endif ?>
-    <?php if ($childCount): ?>
+<?php if ($childCount): ?>
+    <div class="nolink">
         <a
             href="javascript:;"
             class="tree-expand-collapse <?= $expanded ? 'is-expanded' : '' ?> nolink"
@@ -16,5 +8,5 @@
             title="<?= e(trans($expanded ? 'backend::lang.treeview.collapse' : 'backend::lang.treeview.expand')) ?>">
             <span></span>
         </a>
-    <?php endif ?>
-</div>
+    </div>
+<?php endif ?>
