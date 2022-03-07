@@ -4,7 +4,7 @@ use Yaml;
 use File;
 use Lang;
 use Event;
-use Config;
+use System;
 use stdClass;
 use SystemException;
 use October\Rain\Html\Helper as HtmlHelper;
@@ -130,7 +130,7 @@ trait ConfigMaker
     }
 
     /**
-     * Locates a file based on it's definition. If the file starts with
+     * getConfigPath locates a file based on it's definition. If the file starts with
      * the ~ symbol it will be returned in context of the application base path,
      * otherwise it will be returned in context of the config path.
      * @param string $fileName File to load.
@@ -149,10 +149,7 @@ trait ConfigMaker
 
         $fileName = File::symbolizePath($fileName);
 
-        if (File::isLocalPath($fileName) ||
-            // @deprecated
-            (!Config::get('system.restrict_base_dir', true) && realpath($fileName) !== false)
-        ) {
+        if (System::checkBaseDir($fileName)) {
             return $fileName;
         }
 

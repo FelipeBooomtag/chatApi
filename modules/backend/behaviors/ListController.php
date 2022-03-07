@@ -203,6 +203,10 @@ class ListController extends ControllerBehavior
             return $this->controller->listOverrideRecordUrl($record, $definition);
         });
 
+        $widget->bindEvent('list.reorderStructure', function ($record) use ($definition) {
+            return $this->controller->listAfterReorder($record, $definition);
+        });
+
         $widget->bindToController();
 
         /*
@@ -503,7 +507,7 @@ class ListController extends ControllerBehavior
     //
 
     /**
-     * Called after the list columns are defined.
+     * listExtendColumns is called after the list columns are defined.
      * @param \Backend\Widgets\List $host The hosting list widget
      * @return void
      */
@@ -512,7 +516,7 @@ class ListController extends ControllerBehavior
     }
 
     /**
-     * Called after the filter scopes are defined.
+     * listFilterExtendScopes is called after the filter scopes are defined.
      * @param \Backend\Widgets\Filter $host The hosting filter widget
      * @return void
      */
@@ -521,7 +525,7 @@ class ListController extends ControllerBehavior
     }
 
     /**
-     * Controller override: Extend supplied model
+     * listExtendModel controller override: Extend supplied model
      * @param Model $model
      * @return Model
      */
@@ -531,7 +535,7 @@ class ListController extends ControllerBehavior
     }
 
     /**
-     * Controller override: Extend the query used for populating the list
+     * listExtendQueryBefore controller override: Extend the query used for populating the list
      * before the default query is processed.
      * @param \October\Rain\Database\Builder $query
      */
@@ -540,7 +544,7 @@ class ListController extends ControllerBehavior
     }
 
     /**
-     * Controller override: Extend the query used for populating the list
+     * listExtendQuery controller override: Extend the query used for populating the list
      * after the default query is processed.
      * @param \October\Rain\Database\Builder $query
      */
@@ -549,7 +553,7 @@ class ListController extends ControllerBehavior
     }
 
     /**
-     * Controller override: Extend the records used for populating the list
+     * listExtendRecords controller override: Extend the records used for populating the list
      * after the query is processed.
      * @param Illuminate\Contracts\Pagination\LengthAwarePaginator|Illuminate\Database\Eloquent\Collection $records
      */
@@ -558,7 +562,7 @@ class ListController extends ControllerBehavior
     }
 
     /**
-     * Controller override: Extend the query used for populating the filter
+     * listFilterExtendQuery controller override: Extend the query used for populating the filter
      * options before the default query is processed.
      * @param \October\Rain\Database\Builder $query
      * @param array $scope
@@ -568,7 +572,7 @@ class ListController extends ControllerBehavior
     }
 
     /**
-     * Returns a CSS class name for a list row (<tr class="...">).
+     * listInjectRowClass returns a CSS class name for a list row (<tr class="...">).
      * @param  Model $record The populated model used for the column
      * @param  string $definition List definition (optional)
      * @return string CSS class name
@@ -578,7 +582,7 @@ class ListController extends ControllerBehavior
     }
 
     /**
-     * Replace a table column value (<td>...</td>)
+     * listOverrideColumnValue replaces a table column value (<td>...</td>)
      * @param  Model $record The populated model used for the column
      * @param  string $columnName The column name to override
      * @param  string $definition List definition (optional)
@@ -589,7 +593,7 @@ class ListController extends ControllerBehavior
     }
 
     /**
-     * Replace the entire table header contents (<th>...</th>) with custom HTML
+     * listOverrideHeaderValue replaces the entire table header contents (<th>...</th>) with custom HTML
      * @param  string $columnName The column name to override
      * @param  string $definition List definition (optional)
      * @return string HTML view
@@ -605,6 +609,15 @@ class ListController extends ControllerBehavior
      * @return string|array|void New url or complex directive
      */
     public function listOverrideRecordUrl($record, $definition = null)
+    {
+    }
+
+    /**
+     * listAfterReorder is called after the list record structure is reordered
+     * @param \October\Rain\Database\Model $record
+     * @param string|null $definition List definition (optional)
+     */
+    public function listAfterReorder($record, $definition = null)
     {
     }
 

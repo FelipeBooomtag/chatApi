@@ -1,0 +1,4 @@
+title: Products
+modelClass: Felep\Chat\Models\Product
+toolbar:
+    buttons: reorder_toolbar

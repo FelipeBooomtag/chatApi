@@ -1,0 +1,16 @@
+columns:
+    brand_name:
+        label: brand_name
+        type: text
+        searchable: true
+        sortable: true
+    brand_email:
+        label: brand_email
+        type: text
+        searchable: true
+        sortable: true
+    phone_number:
+        label: phone_number
+        type: number
+        searchable: true
+        sortable: true

@@ -1,0 +1,10 @@
+name: Clients
+form: $/felep/chat/models/client/fields.yaml
+modelClass: Felep\Chat\Models\Client
+defaultRedirect: felep/chat/clients
+create:
+    redirect: 'felep/chat/clients/update/:id'
+    redirectClose: felep/chat/clients
+update:
+    redirect: felep/chat/clients
+    redirectClose: felep/chat/clients

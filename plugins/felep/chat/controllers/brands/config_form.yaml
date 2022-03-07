@@ -1,0 +1,10 @@
+name: Brands
+form: $/felep/chat/models/brand/fields.yaml
+modelClass: Felep\Chat\Models\Brand
+defaultRedirect: felep/chat/brands
+create:
+    redirect: 'felep/chat/brands/update/:id'
+    redirectClose: felep/chat/brands
+update:
+    redirect: felep/chat/brands
+    redirectClose: felep/chat/brands

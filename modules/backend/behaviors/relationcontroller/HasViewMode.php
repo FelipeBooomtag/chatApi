@@ -136,6 +136,12 @@ trait HasViewMode
         else {
             $widget->bindEvent('list.extendQueryBefore', function ($query) {
                 $this->relationObject->addDefinedConstraintsToQuery($query);
+
+                // Reset any orders that may have come from the definition
+                // because it has a tendency to break things
+                if (!$this->model->exists) {
+                    $query->getQuery()->orders = [];
+                }
             });
         }
 

@@ -107,9 +107,14 @@ class Form extends WidgetBase implements FormElement
     protected $activeTabSection = null;
 
     /**
-     * @var string Active session key, used for editing forms and deferred bindings.
+     * @var string sessionKey for the active session, used for editing forms and deferred bindings.
      */
     public $sessionKey;
+
+    /**
+     * @var string sessionKeySuffix adds some extra uniqueness to the session key.
+     */
+    public $sessionKeySuffix;
 
     /**
      * @var bool Render this form with uneditable preview data.
@@ -130,6 +135,7 @@ class Form extends WidgetBase implements FormElement
             'context',
             'arrayName',
             'isNested',
+            'sessionKeySuffix',
         ]);
 
         $this->initFormWidgetsConcern();
@@ -1176,9 +1182,8 @@ class Form extends WidgetBase implements FormElement
     }
 
     /**
-     * Returns the active session key.
-     *
-     * @return \Illuminate\Routing\Route|mixed|string
+     * getSessionKey returns the active session key.
+     * @return string
      */
     public function getSessionKey()
     {
@@ -1186,16 +1191,26 @@ class Form extends WidgetBase implements FormElement
             return $this->sessionKey;
         }
 
-        if (post('_session_key')) {
-            return $this->sessionKey = post('_session_key');
+        $sessionKey = post('_session_key');
+
+        if (!$sessionKey) {
+            $sessionKey = FormHelper::getSessionKey();
         }
 
-        return $this->sessionKey = FormHelper::getSessionKey();
+        return $this->sessionKey = $sessionKey;
     }
 
     /**
-     * Returns the active context for displaying the form.
-     *
+     * getSessionKeyWithPrefix
+     * @return string
+     */
+    public function getSessionKeyWithSuffix()
+    {
+        return $this->getSessionKey() . $this->sessionKeySuffix;
+    }
+
+    /**
+     * getContext returns the active context for displaying the form.
      * @return string
      */
     public function getContext()

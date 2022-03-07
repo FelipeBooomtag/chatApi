@@ -120,7 +120,8 @@ trait HasRelationStore
 
             // Save data to the model
             $model = $widget->model;
-            $model->fill($saveData);
+
+            $modelsToSave = $this->prepareModelsToSave($model, $saveData);
 
             if ($this->useGroups) {
                 $this->setGroupCodeOnRelation($model, $data[$this->groupKeyFrom] ?? '');
@@ -130,7 +131,9 @@ trait HasRelationStore
                 $this->processSortOrderForSortable($model, ++$sortCount);
             }
 
-            $model->save(null, $this->sessionKey);
+            foreach ($modelsToSave as $modelToSave) {
+                $modelToSave->save(null, $widget->getSessionKeyWithSuffix());
+            }
 
             $keys[] = $model->getKey();
         }

@@ -227,7 +227,7 @@ class FileUpload extends FormWidgetBase
     {
         $list = $this
             ->getRelationObject()
-            ->withDeferred($this->sessionKey)
+            ->withDeferred($this->getSessionKey())
             ->orderBy('sort_order')
             ->get()
         ;
@@ -333,7 +333,7 @@ class FileUpload extends FormWidgetBase
     {
         $fileModel = $this->getRelationModel();
         if (($fileId = post('file_id')) && ($file = $fileModel::find($fileId))) {
-            $this->getRelationObject()->remove($file, $this->sessionKey);
+            $this->getRelationObject()->remove($file, $this->getSessionKey());
         }
     }
 
@@ -464,7 +464,7 @@ class FileUpload extends FormWidgetBase
                 $fileRelation->add($file);
             }
             else {
-                $fileRelation->add($file, $this->sessionKey);
+                $fileRelation->add($file, $this->getSessionKey());
             }
 
             $file = $this->decorateFileAttributes($file);

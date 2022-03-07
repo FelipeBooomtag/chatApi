@@ -15,27 +15,32 @@ abstract class FormWidgetBase extends WidgetBase
     //
 
     /**
-     * @var \October\Rain\Database\Model Form model object.
+     * @var \October\Rain\Database\Model model object for the form.
      */
     public $model;
 
     /**
-     * @var array Dataset containing field values, if none supplied model should be used.
+     * @var array data containing field values, if none supplied model should be used.
      */
     public $data;
 
     /**
-     * @var string Active session key, used for editing forms and deferred bindings.
+     * @var string sessionKey for the active session, used for editing forms and deferred bindings.
      */
     public $sessionKey;
 
     /**
-     * @var bool Render this form with uneditable preview data.
+     * @var string sessionKeySuffix adds some extra uniqueness to the session key.
+     */
+    public $sessionKeySuffix;
+
+    /**
+     * @var bool previewMode renders this form with uneditable preview data.
      */
     public $previewMode = false;
 
     /**
-     * @var bool Determines if this form field should display comments and labels.
+     * @var bool showLabels determines if this form field should display comments and labels.
      */
     public $showLabels = true;
 
@@ -44,7 +49,7 @@ abstract class FormWidgetBase extends WidgetBase
     //
 
     /**
-     * @var FormField Object containing general form field information.
+     * @var FormField formField object containing general form field information.
      */
     protected $formField;
 
@@ -81,6 +86,7 @@ abstract class FormWidgetBase extends WidgetBase
             'model',
             'data',
             'sessionKey',
+            'sessionKeySuffix',
             'previewMode',
             'showLabels',
             'parentForm',
@@ -145,5 +151,14 @@ abstract class FormWidgetBase extends WidgetBase
             : null;
 
         return $this->formField->getValueFromData($this->data ?: $this->model, $defaultValue);
+    }
+
+    /**
+     * getSessionKey returns the active session key, including suffix.
+     * @return string
+     */
+    public function getSessionKey()
+    {
+        return $this->sessionKey . $this->sessionKeySuffix;
     }
 }

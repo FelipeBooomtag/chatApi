@@ -1,0 +1,4 @@
+title: Brands
+modelClass: Felep\Chat\Models\Brand
+toolbar:
+    buttons: reorder_toolbar

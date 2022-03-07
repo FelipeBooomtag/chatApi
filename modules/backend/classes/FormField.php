@@ -6,6 +6,7 @@ use Lang;
 use October\Rain\Database\Model;
 use October\Rain\Html\Helper as HtmlHelper;
 use October\Rain\Element\Form\FieldDefinition;
+use Illuminate\Support\Collection;
 use SystemException;
 use Exception;
 
@@ -572,9 +573,7 @@ class FormField extends FieldDefinition
     {
         $fieldOptions = [];
 
-        /*
-         * Field options are an explicit method reference
-         */
+        // Field options are an explicit method reference
         if ($methodName) {
             // Calling via ClassName::method
             if (
@@ -605,9 +604,7 @@ class FormField extends FieldDefinition
                 $fieldOptions = $model->$methodName($this->value, $this->fieldName, $data);
             }
         }
-        /*
-         * Refer to the model method or any of its behaviors
-         */
+        // Refer to the model method or any of its behaviors
         else {
             try {
                 [$model, $attribute] = $this->resolveModelAttributeInternal($model, $this->fieldName, true);
@@ -625,9 +622,9 @@ class FormField extends FieldDefinition
                 !$this->objectMethodExists($model, 'getDropdownOptions')
             ) {
                 throw new SystemException(Lang::get('backend::lang.field.options_method_not_exists', [
-                    'model'  => get_class($model),
+                    'model' => get_class($model),
                     'method' => $methodName,
-                    'field'  => $this->fieldName
+                    'field' => $this->fieldName
                 ]));
             }
 
@@ -637,6 +634,11 @@ class FormField extends FieldDefinition
             else {
                 $fieldOptions = $model->getDropdownOptions($attribute, $this->value, $data);
             }
+        }
+
+        // Cast collections to array
+        if ($fieldOptions instanceof Collection) {
+            $fieldOptions = $fieldOptions->all();
         }
 
         return $fieldOptions;

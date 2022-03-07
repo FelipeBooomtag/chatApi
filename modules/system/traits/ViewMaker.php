@@ -4,6 +4,7 @@ use File;
 use Lang;
 use Block;
 use Config;
+use System;
 use SystemException;
 use Throwable;
 
@@ -202,8 +203,8 @@ trait ViewMaker
             $viewPath = [$viewPath];
         }
 
-        foreach (['php', 'htm'] as $extension) {
-            foreach ($viewPath as $path) {
+        foreach ($viewPath as $path) {
+            foreach (['php', 'htm'] as $extension) {
                 $_fileName = File::symbolizePath($path) . '/' . $fileName . '.' . $extension;
                 if (File::isFile($_fileName)) {
                     return $_fileName;
@@ -212,14 +213,7 @@ trait ViewMaker
         }
 
         // Check in absolute
-        // @deprecated rem system.restrict_base_dir, replace with line below
-        // if (strpos($fileName, '/') !== false && File::isLocalPath($fileName))
-        if (
-            strpos($fileName, '/') !== false && (
-                File::isLocalPath($fileName) ||
-                (!Config::get('system.restrict_base_dir', true) && realpath($fileName) !== false)
-            )
-        ) {
+        if (strpos($fileName, '/') !== false && System::checkBaseDir($fileName)) {
             return $fileName;
         }
 
@@ -235,11 +229,7 @@ trait ViewMaker
      */
     public function makeFileContents($filePath, $extraParams = [])
     {
-        if (!strlen($filePath) ||
-            !File::isFile($filePath) ||
-            // @deprecated only resources can be symlinked (system.restrict_base_dir)
-            (!File::isLocalPath($filePath) && Config::get('system.restrict_base_dir', true))
-        ) {
+        if (!strlen($filePath) || !File::isFile($filePath) || !System::checkBaseDir($filePath)) {
             return '';
         }
 

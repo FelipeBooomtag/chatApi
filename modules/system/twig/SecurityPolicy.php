@@ -58,7 +58,7 @@ final class SecurityPolicy implements SecurityPolicyInterface
      * checkSecurity
      * @throws SecurityError
      */
-    public function checkSecurity($tags, $filters, $functions)
+    public function checkSecurity($tags, $filters, $functions): void
     {
     }
 
@@ -66,7 +66,7 @@ final class SecurityPolicy implements SecurityPolicyInterface
      * checkMethodAllowed
      * @throws SecurityNotAllowedMethodError
      */
-    public function checkMethodAllowed($obj, $method)
+    public function checkMethodAllowed($obj, $method): void
     {
         if ($obj instanceof Template || $obj instanceof Markup) {
             return;
@@ -81,7 +81,7 @@ final class SecurityPolicy implements SecurityPolicyInterface
      * checkPropertyAllowed
      * @throws SecurityNotAllowedPropertyError
      */
-    public function checkPropertyAllowed($obj, $property)
+    public function checkPropertyAllowed($obj, $property): void
     {
     }
 

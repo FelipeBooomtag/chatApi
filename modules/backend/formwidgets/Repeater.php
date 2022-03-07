@@ -12,6 +12,7 @@ use Backend\Classes\FormWidgetBase;
  */
 class Repeater extends FormWidgetBase
 {
+    use \Backend\Traits\FormModelSaver;
     use \Backend\Traits\FormModelWidget;
     use \Backend\FormWidgets\Repeater\HasJsonStore;
     use \Backend\FormWidgets\Repeater\HasRelationStore;
@@ -378,6 +379,7 @@ class Repeater extends FormWidgetBase
         $config->alias = $this->alias . 'Form' . $index;
         $config->arrayName = $this->getFieldName().'['.$index.']';
         $config->sessionKey = $this->sessionKey;
+        $config->sessionKeySuffix = $this->sessionKeySuffix . '-' . $index;
 
         $widget = $this->makeWidget(\Backend\Widgets\Form::class, $config);
         $widget->previewMode = $this->previewMode;

@@ -1,0 +1,10 @@
+name: Products
+form: $/felep/chat/models/product/fields.yaml
+modelClass: Felep\Chat\Models\Product
+defaultRedirect: felep/chat/products
+create:
+    redirect: 'felep/chat/products/update/:id'
+    redirectClose: felep/chat/products
+update:
+    redirect: felep/chat/products
+    redirectClose: felep/chat/products

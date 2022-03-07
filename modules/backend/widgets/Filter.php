@@ -212,6 +212,8 @@ class Filter extends WidgetBase
 
         $scope = $this->getScope($scope);
 
+        $updateScopePartial = false;
+
         switch ($scope->type) {
             case 'group':
                 $data = json_decode(post('options'), true);
@@ -293,6 +295,25 @@ class Filter extends WidgetBase
                 $value = post('options.value.' . $scope->scopeName) ?: null;
                 $this->setScopeValue($scope, $value);
                 break;
+
+            case 'clear':
+                foreach ($this->getScopes() as $scope) {
+                    switch ($scope->type) {
+                        case 'checkbox':
+                            $scope->value = false;
+                            break;
+                        case 'switch':
+                            $scope->value = '0';
+                            break;
+                        default:
+                            $scope->value = null;
+                            break;
+                    }
+                }
+
+                $this->resetSession();
+                $updateScopePartial = true;
+                break;
         }
 
         /*
@@ -301,6 +322,11 @@ class Filter extends WidgetBase
         $params = func_get_args();
 
         $result = $this->fireEvent('filter.update', [$params]);
+
+        if ($updateScopePartial) {
+            $this->prepareVars();
+            $result[] = ['.control-filter' => $this->makePartial('filter_scopes')];
+        }
 
         if ($result && is_array($result)) {
             return call_user_func_array('array_merge', $result);
@@ -329,7 +355,7 @@ class Filter extends WidgetBase
             'scopeName' => $scopeName,
             'options' => [
                 'available' => $this->optionsToAjax($available),
-                'active'    => $this->optionsToAjax($active),
+                'active' => $this->optionsToAjax($active),
             ]
         ];
     }

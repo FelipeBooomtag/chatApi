@@ -6,6 +6,19 @@ plugin:
     homepage: ''
 navigation:
     main-menu-item:
-        label: 'Menu Item'
+        label: Notifications
         url: /
-        icon: icon-send
+        icon: icon-bell
+        sideMenu:
+            sub-menu-item:
+                label: Clients
+                url: felep/chat/clients
+                icon: icon-user
+            side-menu-item:
+                label: Brands
+                url: felep/chat/brands
+                icon: icon-star
+            side-menu-item2:
+                label: Products
+                url: felep/chat/products
+                icon: icon-dropbox

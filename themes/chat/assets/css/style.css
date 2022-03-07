@@ -1,0 +1,54 @@
+*
+{
+    padding: 0;
+    margin: 0;
+}
+
+html
+{
+    font-size: 62.5%;
+}
+
+header
+{
+    width: 100%;
+    height: 10vh;
+    background-color: black;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+nav
+{
+    font-size: 2rem;
+}
+
+nav > ul
+{
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    width: 50%;
+    
+}
+
+li
+{
+    margin: 2rem;
+}
+
+a
+{
+    text-decoration: none;
+    color: white;
+}
+
+a:hover
+{
+    border-bottom: 1px solid; 
+}
+
+.active{
+    border-bottom: 1px solid #fff;
+}

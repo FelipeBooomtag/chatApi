@@ -72,11 +72,15 @@ class File extends FileBase
             $uploadsPath .= '/protected';
         }
 
-        if ($this->isLocalStorage() && Config::get('system.relative_links') !== true) {
-            return Url::asset($uploadsPath) . '/';
+        // Relative links
+        if (
+            $this->isLocalStorage() &&
+            Config::get('system.relative_links') === true
+        ) {
+            return $uploadsPath . '/';
         }
 
-        return $uploadsPath . '/';
+        return Url::asset($uploadsPath) . '/';
     }
 
     /**

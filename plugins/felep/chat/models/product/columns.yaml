@@ -1,0 +1,11 @@
+columns:
+    product_name:
+        label: product_name
+        type: text
+        searchable: true
+        sortable: true
+    brand_name:
+        label: brand_name
+        type: text
+        searchable: true
+        sortable: true

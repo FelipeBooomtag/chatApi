@@ -1,0 +1,4 @@
+title: Clients
+modelClass: Felep\Chat\Models\Client
+toolbar:
+    buttons: reorder_toolbar

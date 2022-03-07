@@ -5,7 +5,7 @@ use Model;
 /**
  * Model
  */
-class ChatMessage extends Model
+class Product extends Model
 {
     use \October\Rain\Database\Traits\Validation;
     
@@ -19,7 +19,7 @@ class ChatMessage extends Model
     /**
      * @var string The database table used by the model.
      */
-    public $table = 'felep_chat_message';
+    public $table = 'felep_chat_products';
 
     /**
      * @var array Validation rules

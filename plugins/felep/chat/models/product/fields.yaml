@@ -1,0 +1,9 @@
+fields:
+    product_name:
+        label: 'Product Name'
+        span: auto
+        type: text
+    brand_name:
+        label: 'Brand Name'
+        span: auto
+        type: text

@@ -45,6 +45,7 @@ trait HasFormWidgets
         $widgetConfig = $this->makeConfig($field->config);
         $widgetConfig->alias = $this->alias . studly_case($this->nameToId($field->fieldName));
         $widgetConfig->sessionKey = $this->getSessionKey();
+        $widgetConfig->sessionKeySuffix = $this->sessionKeySuffix;
         $widgetConfig->previewMode = $this->previewMode;
         $widgetConfig->model = $this->model;
         $widgetConfig->data = $this->data;

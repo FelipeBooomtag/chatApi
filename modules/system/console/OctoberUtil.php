@@ -36,6 +36,7 @@ class OctoberUtil extends Command
     use \Illuminate\Console\ConfirmableTrait;
     use \System\Console\OctoberUtilPatches;
     use \System\Console\OctoberUtilCommands;
+    use \System\Console\OctoberUtilRefitLang;
 
     /**
      * The console command name.
