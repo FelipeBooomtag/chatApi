@@ -3,7 +3,14 @@ url = "/sender"
 layout = "default"
 ==
 
-<form id="message" action="/sender" method="post">
+<script>
+    function noRefresh(e){
+        e.preventDefault();
+    }
+
+</script>
+
+<form id="message" action="/sender" method="post" onsubmit="noRefresh()">
     <input type="text" name="data">
     <input id="sumbitButton" type="submit">
 </form>
