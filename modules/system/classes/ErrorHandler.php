@@ -25,40 +25,15 @@ class ErrorHandler extends ErrorHandlerBase
      */
     public function handleException(Throwable $proposedException)
     {
-        if (
-            $proposedException instanceof \Twig\Error\RuntimeError &&
-            ($previousException = $proposedException->getPrevious())
-        ) {
-            // The Twig runtime error is not very useful sometimes, so
-            // uncomment this for an alternative debugging option
-            // if (!$previousException instanceof \Cms\Classes\CmsException) {
-            //     $proposedException = $previousException;
-            // }
-
-            // Convert HTTP exceptions
-            if ($previousException instanceof HttpException) {
-                $proposedException = $previousException;
-            }
-
-            // Convert Not Found exceptions
-            if ($this->isNotFoundException($previousException)) {
-                $proposedException = $previousException;
-            }
-        }
-
-        return parent::handleException($proposedException);
+        return parent::handleException($this->prepareException($proposedException));
     }
 
     /**
-     * beforeHandleError happens when we are about to display an error page to the user,
-     * if it is an SystemException, this event should be logged.
-     * @return void
+     * beforeReport Twig errors masking Http exceptions
      */
-    public function beforeHandleError($exception)
+    public function beforeReport($exception)
     {
-        if ($exception instanceof SystemException) {
-            Log::error($exception);
-        }
+        return $this->prepareException($exception);
     }
 
     /**
@@ -144,5 +119,34 @@ class ErrorHandler extends ErrorHandlerBase
         }
 
         return $exception->getMessage();
+    }
+
+    /**
+     * prepareException
+     */
+    protected function prepareException(Exception $exception)
+    {
+        if (
+            $exception instanceof \Twig\Error\RuntimeError &&
+            ($previousException = $exception->getPrevious())
+        ) {
+            // The Twig runtime error is not very useful sometimes, so
+            // uncomment this for an alternative debugging option
+            // if (!$previousException instanceof \Cms\Classes\CmsException) {
+            //     $exception = $previousException;
+            // }
+
+            // Convert HTTP exceptions
+            if ($previousException instanceof HttpException) {
+                $exception = $previousException;
+            }
+
+            // Convert Not Found exceptions
+            if ($this->isNotFoundException($previousException)) {
+                $exception = $previousException;
+            }
+        }
+
+        return $exception;
     }
 }

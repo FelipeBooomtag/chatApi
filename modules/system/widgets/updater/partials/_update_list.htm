@@ -49,7 +49,7 @@
                                 <?php endforeach ?>
                                 <?php if ($core['old_build']): ?>
                                     <dt class="text-muted"><?= e(trans('system::lang.updates.core_build', ['build'=>$core['old_build']])) ?></dt>
-                                    <dd class="text-muted"><?= e(trans('system::lang.updates.core_current_build')) ?></dd>
+                                    <dd class="text-muted"><?= e(__('Current Build')) ?></dd>
                                 <?php endif ?>
                             </dl>
                         </div>

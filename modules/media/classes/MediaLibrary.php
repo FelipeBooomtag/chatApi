@@ -551,7 +551,7 @@ class MediaLibrary
     public static function url($file)
     {
         if (is_array($file)) {
-            $file = array_shift($file);
+            $file = array_first($file);
         }
 
         if ($file instanceof \October\Rain\Database\Attach\File) {

@@ -45,10 +45,10 @@ class OctoberUpdate extends Command
             exit(1);
         }
 
+        // Migrate database
         $this->comment("Executing: php artisan october:migrate");
         $this->output->newLine();
 
-        // Migrate database
         $errCode = null;
         passthru('php artisan october:migrate', $errCode);
 

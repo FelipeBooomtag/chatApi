@@ -1,4 +1,33 @@
-title = "Home"
 url = "/home"
 layout = "default"
+title = "Home"
+
+[builderList]
+modelClass = "Felep\Chat\Models\Product"
+scope = "-"
+scopeValue = "{{ :scope }}"
+displayColumn = "product_name"
+noRecordsMessage = "No records found"
+detailsPage = "-"
+detailsUrlParameter = "id"
+pageNumber = "{{ :page }}"
 ==
+{% set records = builderList.records %}
+{% set displayColumn = builderList.displayColumn %}
+{% set noRecordsMessage = builderList.noRecordsMessage %}
+{% set detailsPage = builderList.detailsPage %}
+{% set detailsKeyColumn = builderList.detailsKeyColumn %}
+{% set detailsUrlParameter = builderList.detailsUrlParameter %}
+
+<ul class="record-list">
+    {% for record in records %}
+        <li>
+            {{ record.product_name }} {{ record.brand_name }}  
+        </li>
+
+
+    {% endfor %}
+</ul>
+
+
+<input type="text">

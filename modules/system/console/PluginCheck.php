@@ -1,5 +1,6 @@
 <?php namespace System\Console;
 
+use October\Rain\Process\Composer as ComposerProcess;
 use Symfony\Component\Console\Input\InputOption;
 use Illuminate\Console\Command;
 
@@ -47,18 +48,33 @@ class PluginCheck extends Command
         // }
 
         foreach ($deps as $dep) {
-            $this->call('plugin:install', ['name' => $dep, '--no-migrate' => true]);
+            $this->call('plugin:install', ['name' => $dep, '--no-migrate' => true, '--no-update' => true]);
         }
 
+        if (count($deps)) {
+            // Composer update
+            $this->comment("Executing: composer update");
+            $composer = new ComposerProcess;
+            $composer->setCallback(function($message) { echo $message; });
+            $composer->update();
+
+            // Migrate database
+            if (!$this->option('no-migrate')) {
+                $this->comment("Executing: php artisan october:migrate");
+                $this->output->newLine();
+
+                $errCode = null;
+                passthru('php artisan october:migrate', $errCode);
+
+                if ($errCode !== 0) {
+                    $this->output->error('Migration failed. Check output above');
+                    exit(1);
+                }
+            }
+        }
+
+        // Success
         $this->output->writeln('<info>All dependencies installed</info>');
-
-        // Run migrations
-        if (count($deps) && !$this->option('no-migrate')) {
-            $this->comment('Please migrate the database with the following command');
-            $this->output->newLine();
-            $this->line("* php artisan october:migrate");
-            $this->output->newLine();
-        }
     }
 
     /**

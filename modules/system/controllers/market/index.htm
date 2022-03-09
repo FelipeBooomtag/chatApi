@@ -14,7 +14,7 @@
                     <a
                         href="#tabProject"
                         data-tab-url="<?= Backend::url('system/market/index/project') ?>">
-                        <?= e(trans('system::lang.project.name')) ?>
+                        <?= e(__('Project')) ?>
                     </a>
                 </li>
             <?php endif ?>
@@ -22,7 +22,7 @@
                 <a
                     href="#tabPlugins"
                     data-tab-url="<?= Backend::url('system/market/index/plugins') ?>">
-                    <?= e(trans('system::lang.updates.plugins')) ?>
+                    <?= e(__('Plugins')) ?>
                 </a>
             </li>
             <li class="<?= $activeTab == 'themes' ? 'active' : '' ?>">

@@ -35,6 +35,12 @@ class ProjectSync extends Command
             // Install project packages
             $this->installDefinedPlugins();
 
+            // Composer update
+            $this->comment("Executing: composer update");
+            $composer = new ComposerProcess;
+            $composer->setCallback(function($message) { echo $message; });
+            $composer->update();
+
             // Check dependencies
             passthru('php artisan plugin:check --no-migrate');
 
@@ -43,13 +49,19 @@ class ProjectSync extends Command
                 passthru('php artisan theme:check');
             }
 
-            $this->output->success("Project synchronized");
+            // Migrate database
+            $this->comment("Executing: php artisan october:migrate");
+            $this->output->newLine();
 
-            // Run migrations
-            $this->comment('Please migrate the database with the following command');
-            $this->output->newLine();
-            $this->line("* php artisan october:migrate");
-            $this->output->newLine();
+            $errCode = null;
+            passthru('php artisan october:migrate', $errCode);
+
+            if ($errCode !== 0) {
+                $this->output->error('Migration failed. Check output above');
+                exit(1);
+            }
+
+            $this->output->success("Project synchronized");
         }
         catch (Exception $e) {
             $this->output->error($e->getMessage());
@@ -70,17 +82,18 @@ class ProjectSync extends Command
         }
 
         // Composer install differences
-        $requirePackages = implode(' ', $installPackages);
-        $this->comment("Executing: composer require {$requirePackages}");
-        $this->output->newLine();
+        foreach ($installPackages as $installPackage) {
+            $this->comment("Executing: composer require {$installPackage} --no-update");
+            $this->output->newLine();
 
-        $composer = new ComposerProcess;
-        $composer->setCallback(function($message) { echo $message; });
-        $composer->require($requirePackages);
+            $composer = new ComposerProcess;
+            $composer->setCallback(function($message) { echo $message; });
+            $composer->requireNoUpdate($installPackage);
 
-        if ($composer->lastExitCode() !== 0) {
-            $this->output->error('Sync failed. Check output above');
-            exit(1);
+            if ($composer->lastExitCode() !== 0) {
+                $this->output->error('Sync failed. Check output above');
+                exit(1);
+            }
         }
     }
 }

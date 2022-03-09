@@ -57,14 +57,20 @@ class PluginInstall extends Command
             $requirePackage .= ':'.$requireVersion;
         }
 
-        // Composer install
+        // Composer require
         $this->comment("Executing: composer require {$requirePackage}");
         $this->output->newLine();
 
         $composer = new ComposerProcess;
         $composer->setCallback(function($message) { echo $message; });
-        $composer->require($requirePackage);
+        if ($this->option('no-update')) {
+            $composer->requireNoUpdate($requirePackage);
+        }
+        else {
+            $composer->require($requirePackage);
+        }
 
+        // Composer failed
         if ($composer->lastExitCode() !== 0) {
             if ($src = $this->option('from')) {
                 $this->output->writeln("<info>Reverted repo change</info>");
@@ -75,22 +81,22 @@ class PluginInstall extends Command
             exit(1);
         }
 
-        $this->output->success("Plugin '${name}' installed");
-
         // Run migrations
         if (!$this->option('no-migrate')) {
             $this->comment("Executing: php artisan october:migrate");
             $this->output->newLine();
-    
+
             // Migrate database
             $errCode = null;
             passthru('php artisan october:migrate', $errCode);
-    
+
             if ($errCode !== 0) {
                 $this->output->error('Migration failed. Check output above');
                 exit(1);
             }
         }
+
+        $this->output->success("Plugin '${name}' installed");
     }
 
     /**
@@ -143,6 +149,7 @@ class PluginInstall extends Command
             ['from', 'f', InputOption::VALUE_REQUIRED, 'Provide a custom source.'],
             ['want', 'w', InputOption::VALUE_REQUIRED, 'Provide a custom version.'],
             ['no-migrate', null, InputOption::VALUE_NONE, 'Do not run migration after install.'],
+            ['no-update', null, InputOption::VALUE_NONE, 'Do not run composer update after install.'],
         ];
     }
 }

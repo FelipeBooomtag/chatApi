@@ -395,7 +395,7 @@ class Repeater extends FormWidgetBase
     /**
      * getValueFromIndex returns the data at a given index
      */
-    protected function getValueFromIndex(int $index)
+    protected function getValueFromIndex($index)
     {
         $data = $this->isLoaded
             ? $this->getLoadedValueFromPost()

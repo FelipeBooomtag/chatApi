@@ -4,21 +4,21 @@
         class="btn btn-primary oc-icon-refresh"
         onclick="$.oc.updateList.checkForUpdates()"
     >
-        <?= e(trans(/* Check For Updates */'system::lang.updates.check_label')) ?>
+        <?= e(__('Check For Updates')) ?>
     </a>
     <a
         href="<?= Backend::url('system/market') ?>"
         class="btn btn-default oc-icon-plus">
-        <?= e(trans(/* Install Packages */'system::lang.packages.install')) ?>
+        <?= e(__('Install Packages')) ?>
     </a>
     <a
         href="<?= Backend::url('cms/themes') ?>"
         class="btn btn-default oc-icon-image">
-        <?= e(trans(/* Manage Themes */'system::lang.themes.manage')) ?>
+        <?= e(__('Manage Themes')) ?>
     </a>
     <a
         href="<?= Backend::url('system/updates/manage') ?>"
         class="btn btn-default oc-icon-puzzle-piece">
-        <?= e(trans(/* Manage Plugins */'system::lang.plugins.manage')) ?>
+        <?= e(__('Manage Plugins')) ?>
     </a>
 </div>

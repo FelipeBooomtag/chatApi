@@ -21,9 +21,19 @@ class Brand extends Model
      */
     public $table = 'felep_chat_brands';
 
+    public $belongsToMany= [
+        'products' => [
+            'Felep/Test/Models/Product',
+            'table' => 'felep_chat_products',
+            'order' => 'product_name',
+        ]
+        ];
+
     /**
      * @var array Validation rules
      */
     public $rules = [
     ];
+
+
 }
