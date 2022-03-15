@@ -1,0 +1,10 @@
+name: Messages
+form: $/felep/chat/models/message/fields.yaml
+modelClass: Felep\Chat\Models\Message
+defaultRedirect: felep/chat/messages
+create:
+    redirect: 'felep/chat/messages/update/:id'
+    redirectClose: felep/chat/messages
+update:
+    redirect: felep/chat/messages
+    redirectClose: felep/chat/messages

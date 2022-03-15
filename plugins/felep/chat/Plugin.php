@@ -10,7 +10,7 @@ class Plugin extends PluginBase
     public function registerComponents()
     {
            return [
-
+                \Felep\Chat\Components\Message::class => "postmessage"
             ];
         
     }
@@ -32,5 +32,6 @@ class Plugin extends PluginBase
         $data = request()->data;
         $pusher = new Pusher\Pusher($key, $secret, $app_id, ['cluster' => $cluster]);
         $pusher->trigger('my-channel', 'my-event', $data);
+        
     }
 }

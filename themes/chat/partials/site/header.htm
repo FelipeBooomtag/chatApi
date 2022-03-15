@@ -3,5 +3,7 @@
         <li class="{% if this.page.id == 'pusher' %} active {% endif %}"><a href="{{ 'pusher'|page }}">Pusher</a></li>
         <li class="{% if this.page.id == 'sender' %} active {% endif %}"><a href="{{ 'sender'|page }}">Sender</a></li>
         <li class="{% if this.page.id == 'home' %} active {% endif %}"><a href="{{ 'home'|page }}">Home</a></li>
+        <li><a data-request="onLogout" data-request-data="redirect: '/home'">Sign out</a></li>
+
     </ul>
 </nav>

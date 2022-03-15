@@ -1,17 +1,10 @@
+url = "/message"
 title = "Message"
 layout = "default"
-url = "/filter"
 
-[builderList]
-modelClass = "Felep\Chat\Models\Product"
-scope = "-"
-scopeValue = "{{ :scope }}"
-displayColumn = "product_name"
-noRecordsMessage = "No records found"
-detailsPage = "-"
-detailsUrlParameter = "id"
-pageNumber = "{{ :page }}"
+[postmessage]
 ==
+
 {% set records = builderList.records %}
 {% set displayColumn = builderList.displayColumn %}
 {% set noRecordsMessage = builderList.noRecordsMessage %}
@@ -19,13 +12,15 @@ pageNumber = "{{ :page }}"
 {% set detailsKeyColumn = builderList.detailsKeyColumn %}
 {% set detailsUrlParameter = builderList.detailsUrlParameter %}
 
-<form action="/sent">
+<form action="/message" method="post">
     
         
             <label for="Title">Title</label>
             <input type="text">
+
+
             <label for="description"></label>
-            <textarea></textarea>
+            <textarea name="description" id="descriptionFill"></textarea>
         
         <input type='text' ... list='listid'>
          <datalist id='listid'>
@@ -41,5 +36,5 @@ pageNumber = "{{ :page }}"
             {% endfor %}
         </datalist>
         
+        <button type="submit">sumbit</button>
 </form>
-

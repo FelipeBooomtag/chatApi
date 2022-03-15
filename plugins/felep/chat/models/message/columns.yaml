@@ -1,0 +1,4 @@
+columns:
+    message_text:
+        label: Message
+        type: text

@@ -28,12 +28,16 @@ return [
         'manage_plugins' => 'Create and edit plugins',
     ],
     'author_name' => [
-        'title' => 'Author name',
+        'title' => 'Author Name',
         'description' => 'Default author name to use for your new plugins. The author name is not fixed - you can change it in the plugins configuration at any time.',
     ],
     'author_namespace' => [
-        'title' => 'Author namespace',
+        'title' => 'Author Namespace',
         'description' => 'If you develop for the Marketplace, the namespace should match the author code and cannot be changed. Refer to the documentation for details.',
+    ],
+    'config' => [
+        'use_table_comments_label' => 'Include Table Comments',
+        'use_table_comments_comment' => 'Show comment field when defining table columns.'
     ],
     'database' => [
         'menu_label' => 'Database',
@@ -53,6 +57,7 @@ return [
         'column_name_nullable' => 'Nullable',
         'column_auto_increment' => 'AUTOINCR',
         'column_default' => 'Default',
+        'column_comment' => 'Comment',
         'column_auto_primary_key' => 'PK',
         'tab_new_table' => 'New table',
         'btn_add_column' => 'Add column',
@@ -603,6 +608,13 @@ return [
         'property_code_required' => 'Please enter the menu item code.',
         'error_duplicate_main_menu_code' => "Duplicate main menu item code: ':code'.",
         'error_duplicate_side_menu_code' => "Duplicate side menu item code: ':code'.",
+        'icon_svg' => 'iconSvg',
+        'icon_svg_description' => 'An SVG icon to be used in place of the standard icon. The SVG icon should be a rectangle and can support colors',
+        'counter' => 'Counter',
+        'counter_description' => 'A numeric value to output near the menu icon. The value should be a number or a callable returning a number',
+        'counter_label' => 'counterLabel',
+        'counter_label_description' => 'A string value to describe the numeric reference in counter',
+        'counter_group' => 'Counter'
     ],
     'localization' => [
         'menu_label' => 'Localization',

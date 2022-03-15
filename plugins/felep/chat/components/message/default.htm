@@ -1,0 +1,52 @@
+url = "/filter"
+layout = "default"
+title = "Message"
+
+[builderList]
+modelClass = "Felep\Chat\Models\Product"
+scope = "-"
+scopeValue = "{{ :scope }}"
+displayColumn = "product_name"
+noRecordsMessage = "No records found"
+detailsPage = "-"
+detailsUrlParameter = "id"
+pageNumber = "{{ :page }}"
+
+[session]
+security = "all"
+allowedUserGroups[] = "brand"
+redirect = "message"
+==
+{% set records = builderList.records %}
+{% set displayColumn = builderList.displayColumn %}
+{% set noRecordsMessage = builderList.noRecordsMessage %}
+{% set detailsPage = builderList.detailsPage %}
+{% set detailsKeyColumn = builderList.detailsKeyColumn %}
+{% set detailsUrlParameter = builderList.detailsUrlParameter %}
+
+{{form_ajax('onMessage')}}
+    
+        
+            <label for="Title">Title</label>
+            <input type="text">
+
+
+            <label for="description"></label>
+            <textarea name="description" id="descriptionFill"></textarea>
+        
+        <!-- <input type='text' ... list='listid'>
+         <datalist id='listid'>
+            {% for record in records %}
+           <option>{{ record.brand_name }}</option>
+            {% endfor %}
+        </datalist>
+
+        <input type='text' ... list='products'>
+         <datalist id='products'>
+            {% for record in records %}
+           <option>{{ record.product_name }}</option>
+            {% endfor %}
+        </datalist>
+         -->
+        <button type="submit">sumbit</button>
+{{form_close}}

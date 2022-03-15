@@ -22,3 +22,7 @@ navigation:
                 label: Products
                 url: felep/chat/products
                 icon: icon-dropbox
+            message:
+                label: Message
+                url: felep/chat/messages
+                icon: icon-envelope

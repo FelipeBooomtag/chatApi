@@ -3,11 +3,15 @@ layout = "default"
 title = "login"
 
 [account]
-redirect = 0
 paramCode = "code"
 forceSecure = 0
 requirePassword = 0
+
+[session]
+security = "all"
 ==
+{% component 'session' %}
+
 {% if not user %}
 
     <div class="row">
@@ -24,11 +28,16 @@ requirePassword = 0
     </div>
 
 {% else %}
+    <div class="row">
+        {% partial account ~ '::activation_check' %}
 
-    {% partial account ~ '::activation_check' %}
+        {% partial account ~ '::update' %}
 
-    {% partial account ~ '::update' %}
+        {% partial account ~ '::deactivate_link' %}
+    </div>
 
-    {% partial account ~ '::deactivate_link' %}
+    
+
+    
 
 {% endif %}

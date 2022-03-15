@@ -1,0 +1,4 @@
+title: Messages
+modelClass: Felep\Chat\Models\Message
+toolbar:
+    buttons: reorder_toolbar

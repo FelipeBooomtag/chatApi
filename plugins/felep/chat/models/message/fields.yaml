@@ -1,0 +1,6 @@
+fields:
+    message_text:
+        label: Description
+        size: ''
+        span: auto
+        type: textarea
